@@ -18,7 +18,7 @@ public class PlayerTypeInitializer {
 				break;
 			case Button.ID_ENTER:
 				System.out.println("Golie");
-				Goalie robotGoalie = new Goalie();
+				GeneralPlayer robotGoalie = new GeneralPlayer();
 				robotGoalie.start();
 				break;
 		}

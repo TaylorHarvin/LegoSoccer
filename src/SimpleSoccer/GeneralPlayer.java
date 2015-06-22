@@ -9,59 +9,71 @@ import lejos.robotics.filter.MeanFilter;
 import lejos.utility.Delay;
 import lejos.hardware.sensor.*;
 
-public class Goalie {
+public class GeneralPlayer {
 	public SoccerMotorMotion roboMotor;
 	public HiTechnicCompass mainCompass;
 	public final SensorMode baseDir;
 	public float [] vals;
 	public SampleProvider averageDir;
-	public float baseDirVal = 0;
+	public float goalLocation = 0;
 	public BallFinder ballFinder;
+	public GoalFinder goalFinder;
 	
 	//public EV3LargeRegulatedMotor a;
 	
 	
-	public Goalie(){
-		roboMotor = new SoccerMotorMotion(MotorPort.B,MotorPort.C, MotorPort.A);
-		System.out.println("Press Enter for Direction");
+	public GeneralPlayer(){
+		roboMotor = new SoccerMotorMotion(MotorPort.A,MotorPort.D, MotorPort.C);
+		//System.out.println("Press Enter for Direction");
 		Button.ENTER.waitForPress();
-		mainCompass = new HiTechnicCompass(SensorPort.S3);
+		mainCompass = new HiTechnicCompass(SensorPort.S4);
 		baseDir = mainCompass.getCompassMode();
+		goalFinder = new GoalFinder(baseDir,roboMotor);
+		goalFinder.setGoalLocation();
+		Delay.msDelay(1000);
+		System.out.println("Turn");
+		Delay.msDelay(3000);
+		goalFinder.turnToGoal();
+		
 		//baseDir.fetchSample(vals, 0);
 		//System.out.println(vals[0]);
-		averageDir = new MeanFilter(baseDir,5);
+		/*averageDir = new MeanFilter(baseDir,5);
 		vals = new float[averageDir.sampleSize()];
-		averageDir.fetchSample(vals, 0);
-		setBaseDirection();
+		averageDir.fetchSample(vals, 0);*/
+		//setBaseDirection();
 		
 	}
 	
 	public void setBaseDirection(){
-		/*System.out.println("Hit Enter\nfor Direction");
+		System.out.println("Hit Enter\nfor Direction");
 		Button.waitForAnyPress();
 		averageDir.fetchSample(vals, 0);
-		baseDirVal = vals[0];
-		if(baseDirVal+120 > 360){
-			baseDirVal -= 360;
-		}*/
-		
-		ballFinder = new BallFinder(SensorPort.S1, roboMotor);
-		ballFinder.start();
+		goalLocation = vals[0];
+		if(goalLocation+120 > 360){
+			goalLocation -= 360;
+		}
+		System.out.println("Move Dir");
+		Delay.msDelay(4000);
+		/*ballFinder = new BallFinder(SensorPort.S1, roboMotor);
+		ballFinder.start();*/
 	}
 	
 	
 	public void start(){
-		/*//Delay.msDelay(1500);
-		Boolean keep_looking = true;
-		setBaseDirection();
-		roboMotor.turnLeft(SoccerMotorMotion.MEDIUM);
+		
+		
+		
+		//Delay.msDelay(1500);
+		/*Boolean keep_looking = true;
+		//setBaseDirection();
+		roboMotor.turnLeft(SoccerMotorMotion.FAST);
 		
 		
 		averageDir.fetchSample(vals, 0);
-		baseDirVal = (float) Math.toRadians(vals[0]);
-		float baseDirLeft = baseDirVal + 120;
+		goalLocation = vals[0];
+		float baseDirLeft = goalLocation + 20;
 		
-		float baseDirRight = baseDirVal - 120;
+		float baseDirRight = goalLocation - 20;
 		
 		do{
 			averageDir.fetchSample(vals, 0);
@@ -70,9 +82,6 @@ public class Goalie {
 			Delay.msDelay(50);
 			if(Button.ENTER.isDown())
 				keep_looking = false;
-			if(vals[0] < 0){
-				
-			}
 		}while(vals[0] < baseDirLeft && keep_looking);
 		
 		//roboMotor.stop();
@@ -84,11 +93,11 @@ public class Goalie {
 			Delay.msDelay(50);
 			if(Button.ENTER.isDown())
 				keep_looking = false;
-		}while(vals[0] > baseDirVal && keep_looking);
+		}while(vals[0] > goalLocation && keep_looking);
 		// Turn 90 degrees left
 		roboMotor.stop();
 		System.out.println("done");
-		System.out.println(baseDirVal);
+		System.out.println(goalLocation);
 		Delay.msDelay(10000);
 		//roboMotor.stop();*/
 	}
