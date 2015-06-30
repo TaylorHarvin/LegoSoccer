@@ -12,51 +12,59 @@ import lejos.utility.Delay;
 public class SoccerMotorMotion {
 	
 	// Speed constants
-	public static int FAST = 100;
-	public static int MEDIUM = 75;
-	public static int SLOW = 25;
+	public static int FAST = 700;
+	public static int MEDIUM = 525;
+	public static int SLOW = 125;
 	
+	public final float baseArmPos;
+	public float curArmPos;
 
 	
 	// Motor associations
-	public UnregulatedMotor leftMotor;
-	public UnregulatedMotor rightMotor;
+	public EV3LargeRegulatedMotor leftMotor;
+	public EV3LargeRegulatedMotor rightMotor;
 	public EV3MediumRegulatedMotor armMotor;
 	
 	public SoccerMotorMotion(Port left, Port right, Port arm){
-		leftMotor = new UnregulatedMotor(left);
-		rightMotor = new UnregulatedMotor(right);
+		leftMotor = new EV3LargeRegulatedMotor(left);
+		rightMotor = new EV3LargeRegulatedMotor(right);
 		armMotor = new EV3MediumRegulatedMotor(arm);
+		baseArmPos = armMotor.getPosition();
+		curArmPos = baseArmPos;
 	}
 	
 	public void goForward(int speed){
-		leftMotor.setPower(speed);
-		rightMotor.setPower(speed);
+		leftMotor.setSpeed(speed);
+		rightMotor.setSpeed(speed);
 		leftMotor.forward();
 		rightMotor.forward();
 	}
 	
 	public void goBackward(int speed){
-		leftMotor.setPower(speed);
-		rightMotor.setPower(speed);
+		leftMotor.setSpeed(speed);
+		rightMotor.setSpeed(speed);
 		leftMotor.backward();
 		rightMotor.backward();
 	}
 	
 	public void turnLeft(int speed){
-		leftMotor.setPower(speed);
-		rightMotor.setPower(speed);
+		leftMotor.setSpeed(speed);
+		rightMotor.setSpeed(speed);
 		leftMotor.backward();
 		rightMotor.forward();
 	}
 	
 	public void turnRight(int speed){
-		leftMotor.setPower(speed);
-		rightMotor.setPower(speed);
+		leftMotor.setSpeed(speed);
+		rightMotor.setSpeed(speed);
 		leftMotor.forward();
 		rightMotor.backward();
 	}
 	
+	public void killMotors(){
+		leftMotor.stop();
+		rightMotor.stop();
+	}
 	
 	public void haltMotionMotors(){
 		leftMotor.flt();
@@ -70,15 +78,50 @@ public class SoccerMotorMotion {
 	}
 	
 	public void hitBall(){
-		armMotor.setSpeed(2000);
+		goForward(300);
+		Delay.msDelay(700);
+		armMotor.setSpeed(7000);
 		armMotor.rotate(-120);
-		Delay.msDelay(2000);
-		returnArm();
+		//returnArm();
 	}
 	
-	public void returnArm(){
-		armMotor.setSpeed(2000);
-		armMotor.rotate(120);
-		Delay.msDelay(2000);
+	public void closeArm(){
+		armMotor.setSpeed(7000);
+		armMotor.rotate(100);
 	}
+	
+	public void openArmWithBall(){
+		armMotor.setSpeed(7000);
+		armMotor.rotate(-45);
+		//Delay.msDelay(2000);
+		System.out.println(armMotor.getPosition());
+	}
+	
+	
+	
+	public void grabBall(){
+		//System.out.println(baseArmPos);
+		//Delay.msDelay(2000);
+		armMotor.setSpeed(7000);
+		armMotor.rotate(45);
+		Delay.msDelay(100);
+		curArmPos = armMotor.getPosition();
+		//Delay.msDelay(2000);
+		
+	}
+	
+	
+	public void aimKick(){
+		this.haltMotionMotors();
+		goBackward(SoccerMotorMotion.SLOW);
+		Delay.msDelay(500);
+		this.haltMotionMotors();
+		openArmWithBall();
+		Delay.msDelay(1000);
+		goBackward(SoccerMotorMotion.SLOW);
+		Delay.msDelay(1200);
+		this.haltMotionMotors();
+		closeArm();
+	}
+	
 }

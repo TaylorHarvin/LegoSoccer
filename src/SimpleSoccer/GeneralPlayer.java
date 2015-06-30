@@ -12,29 +12,36 @@ import lejos.hardware.sensor.*;
 public class GeneralPlayer {
 	public SoccerMotorMotion roboMotor;
 	public HiTechnicCompass mainCompass;
+	//public EV3GyroSensor mainCompass;
 	public final SensorMode baseDir;
 	public float [] vals;
 	public SampleProvider averageDir;
 	public float goalLocation = 0;
 	public BallFinder ballFinder;
 	public GoalFinder goalFinder;
+	public ColorDetector colorDetector;
+	
 	
 	//public EV3LargeRegulatedMotor a;
 	
 	
 	public GeneralPlayer(){
-		roboMotor = new SoccerMotorMotion(MotorPort.A,MotorPort.D, MotorPort.C);
-		//System.out.println("Press Enter for Direction");
+		roboMotor = new SoccerMotorMotion(MotorPort.A,MotorPort.D, MotorPort.B);
+		System.out.println("Press Enter for Direction");
 		Button.ENTER.waitForPress();
 		mainCompass = new HiTechnicCompass(SensorPort.S4);
+		//mainCompass = new EV3GyroSensor(SensorPort.S4);
+		
 		baseDir = mainCompass.getCompassMode();
+		//baseDir = (SensorMode) mainCompass.getAngleMode();
 		goalFinder = new GoalFinder(baseDir,roboMotor);
 		goalFinder.setGoalLocation();
-		Delay.msDelay(1000);
+		/*Delay.msDelay(1000);
 		System.out.println("Turn");
 		Delay.msDelay(3000);
-		goalFinder.turnToGoal();
-		
+		goalFinder.turnToGoal();*/
+		ballFinder = new BallFinder(goalFinder,SensorPort.S3,SensorPort.S2,roboMotor);
+		colorDetector = new ColorDetector(SensorPort.S1);
 		//baseDir.fetchSample(vals, 0);
 		//System.out.println(vals[0]);
 		/*averageDir = new MeanFilter(baseDir,5);
@@ -61,8 +68,27 @@ public class GeneralPlayer {
 	
 	public void start(){
 		
+		// Wonder (to find ball)
+		//ballFinder.searchForBall();
+		// ball found, so go to the ball
+		ballFinder.goToBall();
+		// Turn to the goal (forward)
+		goalFinder.turnToGoal();
+		// Go to the goal ( go forward until red or green are hit)
+		roboMotor.goForward(SoccerMotorMotion.FAST);
+		//Delay.msDelay(1500);
+		while(!colorDetector.inShootingRange() && !ballFinder.touchActivated()){
+			Delay.msDelay(50);
+		}
+		roboMotor.haltMotionMotors();
+		// Hit the ball
+		roboMotor.aimKick();
+		//goalFinder.turnToGoal();
+		roboMotor.hitBall();
+		// Go back to wondering for the ball
+		//ballFinder.searchForBall();
 		
-		
+		/***********OTHER TEST***************/
 		//Delay.msDelay(1500);
 		/*Boolean keep_looking = true;
 		//setBaseDirection();

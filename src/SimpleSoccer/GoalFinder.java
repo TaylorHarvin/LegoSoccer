@@ -38,13 +38,13 @@ public class GoalFinder {
 			goalLocation -= 360;
 		}*/
 		
-		goalLocationLeftMax = goalLocation + 3;
+		goalLocationLeftMax = goalLocation + 1;
 		
 		// Normalize the left goal range max 0 to 360
 		if(goalLocationLeftMax > 360)
 			goalLocationLeftMax -= 360;
 		
-		goalLocationRightMax = goalLocation - 3;
+		goalLocationRightMax = goalLocation - 1;
 		// Normalize the right goal range max 0 to 360
 		if(goalLocationRightMax < 0)
 			goalLocationRightMax += 360;
@@ -58,18 +58,24 @@ public class GoalFinder {
 	// Aim the robot towards the goal
 	public void turnToGoal(){
 		Boolean keepLooking = true;
-		roboMotor.turnLeft(SoccerMotorMotion.MEDIUM);
+		averageDir.fetchSample(vals, 0);
+		float dirDiff1 = goalLocation-vals[0];
+		float dirDiff2 = vals[0]-goalLocation;
+		if(dirDiff1 < 0)
+			roboMotor.turnLeft(200);
+		else
+			roboMotor.turnRight(200);
 		
 		// Turn the robot until the front of the robot is in the direction
 		// of the goal
 		do{
-			//Delay.msDelay(50);
+			Delay.msDelay(50);
 			averageDir.fetchSample(vals, 0);
 			//System.out.println(vals[0]);
 			if(Button.ENTER.isDown())
 				keepLooking = false;
 		}while((vals[0] > goalLocationLeftMax || vals[0] < goalLocationRightMax) && keepLooking);
-		roboMotor.stop();
+		roboMotor.haltMotionMotors();
 		System.out.println("Goal Dir Set:\n"+goalLocation);
 		System.out.println("Left Max:\n"+goalLocationLeftMax);
 		System.out.println("Right Max:\n"+goalLocationRightMax);
@@ -77,7 +83,5 @@ public class GoalFinder {
 		System.out.println("Final:\n"+vals.toString());
 		
 	}
-	
-	
 	
 }
