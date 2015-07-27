@@ -39,6 +39,7 @@ public class SoccerMotorMotion {
 		RegulatedMotor[] tempReg = new RegulatedMotor[1];
 		tempReg[0] = rightMotor;
 		leftMotor.synchronizeWith(tempReg);
+		leftMotor.startSynchronization();
 		armMotor = new EV3MediumRegulatedMotor(arm);
 		baseArmPos = armMotor.getPosition();
 		curArmPos = baseArmPos;
@@ -46,44 +47,48 @@ public class SoccerMotorMotion {
 	
 	
 	// Make the robot go forwards at a given speed
-	public void goForward(int speed){
-		leftMotor.startSynchronization();
+	public void goForward(int speed,int timeDelay){
+		//leftMotor.startSynchronization();
 		leftMotor.setSpeed(speed);
 		rightMotor.setSpeed(speed);
 		leftMotor.forward();
 		rightMotor.forward();
-		leftMotor.endSynchronization();
+		Delay.msDelay(timeDelay);
+		//leftMotor.endSynchronization();
 	}
 	
 	// Make the robot go backwards at a given speed
-	public void goBackward(int speed){
+	public void goBackward(int speed, int timeDelay){
 		leftMotor.startSynchronization();
 		leftMotor.setSpeed(speed);
 		rightMotor.setSpeed(speed);
 		leftMotor.backward();
 		rightMotor.backward();
+		Delay.msDelay(timeDelay);
 		leftMotor.endSynchronization();
 	}
 	
 	
 	// Turn the robot to the left at a given speed
-	public void turnLeft(int speed){
+	public void turnLeft(int speed, int timeDelay){
 		leftMotor.startSynchronization();
 		leftMotor.setSpeed(speed);
 		rightMotor.setSpeed(speed);
 		leftMotor.backward();
 		rightMotor.forward();
+		Delay.msDelay(timeDelay);
 		leftMotor.endSynchronization();
 	}
 	
 	
 	// Turn the robot to the right at a given speed
-	public void turnRight(int speed){
+	public void turnRight(int speed, int timeDelay){
 		leftMotor.startSynchronization();
 		leftMotor.setSpeed(speed);
 		rightMotor.setSpeed(speed);
 		leftMotor.forward();
 		rightMotor.backward();
+		Delay.msDelay(timeDelay);
 		leftMotor.endSynchronization();
 	}
 	
@@ -100,24 +105,25 @@ public class SoccerMotorMotion {
 	
 	// End rotation of the wheel motors
 	// Note: this is for gradual stops
-	public void haltMotionMotors(){
-		leftMotor.startSynchronization();
+	public void haltMotionMotors(int timeDelay){
+		//leftMotor.startSynchronization();
 		/*leftMotor.flt();
 		rightMotor.flt();*/
 		leftMotor.stop();
 		rightMotor.stop();
-		leftMotor.endSynchronization();
+		Delay.msDelay(timeDelay);
+		//leftMotor.endSynchronization();
 	}
 	
 	
 	// This completely closes the motors
 	// Note: ONLY use this at termination of the program
 	public void stop(){
-		leftMotor.startSynchronization();
-		haltMotionMotors();
+		//leftMotor.startSynchronization();
+		haltMotionMotors(0);
 		leftMotor.close();
 		rightMotor.close();
-		leftMotor.endSynchronization();
+		//leftMotor.endSynchronization();
 	}
 	
 	
@@ -127,10 +133,8 @@ public class SoccerMotorMotion {
 	 */
 	 
 	public void hitBall(){
-		goForward(100);
-		Delay.msDelay(1000);
-		goForward(SoccerMotorMotion.FAST);
-		Delay.msDelay(100);
+		goForward(100,1000);
+		goForward(SoccerMotorMotion.FAST,100);
 		armMotor.setSpeed(10000);
 		armMotor.rotate(120);
 		//returnArm();
@@ -170,13 +174,11 @@ public class SoccerMotorMotion {
 	 * Note:  The robot must be aimed towards the it's target prior to this.
 	 */
 	public void aimKick(){
-		this.haltMotionMotors();
-		Delay.msDelay(1000);
+		this.haltMotionMotors(1000);
 		openArmWithBall();
 		Delay.msDelay(1000);
-		goBackward(SoccerMotorMotion.SLOW);
-		Delay.msDelay(1200);
-		this.haltMotionMotors();
+		goBackward(SoccerMotorMotion.SLOW,1200);
+		this.haltMotionMotors(200);
 		closeArm();
 	}
 	

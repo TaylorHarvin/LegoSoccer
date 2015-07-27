@@ -46,39 +46,37 @@ public class GeneralPlayer {
 	// Note:  This is assuming that the goal direction has been set by this point
 	public void start(){
 		// Wonder (to find ball)
-		//ballFinder.searchForBall();
+		ballFinder.searchForBall();
 		// ball found, so go to the ball
 		ballFinder.goToBall();
 		// Turn to the goal (forward)
 		goalFinder.turnToGoal();
 		// Go to the goal ( go forward until red or green are hit)
-		roboMotor.goForward(SoccerMotorMotion.MEDIUM);
+		roboMotor.goForward(SoccerMotorMotion.MEDIUM,0);
 		//Delay.msDelay(1500);
-		Boolean inShootingRange = colorDetector.inShootingRange();
+		Boolean inShootingRange = colorDetector.atEdgeOfGoal();
+		// Go to the goal to shoot (assuming that the robot still has the ball)
 		while(!inShootingRange){
-			while(!colorDetector.inShootingRange() && !ballFinder.touchActivated()){
+			while(!colorDetector.atEdgeOfGoal() && !ballFinder.touchActivated()){
 				Delay.msDelay(10);
-				inShootingRange = colorDetector.inShootingRange();
+				inShootingRange = colorDetector.atEdgeOfGoal();
 			}
 			// Another robot hit (or wall), go backward a little bit
 			if(!inShootingRange){
-				roboMotor.goBackward(SoccerMotorMotion.MEDIUM);
-				Delay.msDelay(1000);
-				roboMotor.haltMotionMotors();
-				Delay.msDelay(200);
-				roboMotor.goForward(SoccerMotorMotion.MEDIUM);
+				roboMotor.goBackward(SoccerMotorMotion.MEDIUM,1000);
+				roboMotor.haltMotionMotors(200);
+				roboMotor.goForward(SoccerMotorMotion.MEDIUM,0);
 			}
 		}
-		roboMotor.haltMotionMotors();
+		roboMotor.haltMotionMotors(200);
 		// Hit the ball
-		roboMotor.goBackward(SoccerMotorMotion.MEDIUM);
-		Delay.msDelay(1000);
+		roboMotor.goBackward(SoccerMotorMotion.MEDIUM,1000);
 		// Turn to the goal (forward)
 		goalFinder.turnToGoal();
 		roboMotor.aimKick();
 		//goalFinder.turnToGoal();
 		roboMotor.hitBall();
-		roboMotor.haltMotionMotors();
+		roboMotor.haltMotionMotors(200);
 		// Go back to wondering for the ball
 		//ballFinder.searchForBall();
 	}

@@ -24,10 +24,10 @@ public class ColorDetector {
 		colorSample = new float[colorDataProvider.sampleSize()];
 	}
 	
-	// Check if the robot is in a shooting range of the goal
-	public boolean inShootingRange(){
+	// Check if the robot is in a shooting range of the goal (or if goalie is still in the goal)	
+	public boolean atEdgeOfGoal(){
 		colorDataProvider.fetchSample(colorSample, 0);
-		if(colorSample[0] == Color.RED /*|| colorSample[0] == Color.GREEN*/)
+		if(colorSample[0] == Color.BLACK /*|| colorSample[0] == Color.GREEN*/)
 			return true;
 		else
 			return false;
