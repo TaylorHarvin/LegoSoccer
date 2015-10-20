@@ -30,16 +30,16 @@ public class GeneralPlayer {
 //	public SoccerMotorMotion roboMotor;		// Motor control for all of the motors
 	//public HiTechnicCompass mainCompass;	// Main compass of the robot
 	//public final SensorMode baseDir;		// Data provider from the compass
-	public BallFinder ballFinder;			// A helper for soccer ball locating on the board
+	private BallFinder ballFinder;			// A helper for soccer ball locating on the board
 	//public GoalFinder goalFinder;			// A helper for goal locating when the robot has the ball
-	private ColorDetector colorDetector;		// A helper for locating the position of the robot on the board
-	private DifferentialPilot diffPilot;
-	private Navigator roboMotor;
-	private EV3MediumRegulatedMotor arm;
-	private GoalFinder goalFinder;
-	private BotCommunicator botComm;
-	private int xPosOffset = 0;
-	private int yPosOffset = 0;
+	private ColorDetector colorDetector;	// A helper for locating the position of the robot on the board
+	private DifferentialPilot diffPilot;	// Tracks movement for navigator
+	private Navigator roboMotor;			// Grid navigation handler
+	private EV3MediumRegulatedMotor arm;	// Main arm (not currently used due to navigation blocking)
+	private GoalFinder goalFinder;			// Tools to find the goal
+	private BotCommunicator botComm;		// Robot networking
+	private int xPosOffset = 0;				// x Offset from the first robot
+	private int yPosOffset = 0;				// y Offset from the second robot
 	
 	// Constructor for the GeneralPlayer
 	public GeneralPlayer(boolean isServer,int xOffset,int yOffset){
@@ -58,7 +58,7 @@ public class GeneralPlayer {
 		ballFinder.setPassState(!isServer);
 		colorDetector = new ColorDetector(SensorPort.S1);
 		diffPilot.setRotateSpeed(50);
-		goalFinder = new GoalFinder(roboMotor,colorDetector);
+		goalFinder = new GoalFinder(roboMotor,colorDetector,xOffset,yOffset);
 		botComm = new BotCommunicator(isServer);
 		xPosOffset = xOffset;
 		yPosOffset = yOffset;
@@ -84,13 +84,20 @@ public class GeneralPlayer {
 		while(roboMotor.isMoving()){
 			Delay.msDelay(50);
 		}*/
-		float[] otherBotPos = new float[2];
-		PoseProvider roboPos = roboMotor.getPoseProvider();
-		Boolean passConfirmed = false;
+		
+		/*ballFinder.closeArm();
+		goalFinder.gotoGoal();
+		ballFinder.kickBall();*/
+		
+		float[] otherBotPos = new float[2];					// Other robot position for the pass
+		PoseProvider roboPos = roboMotor.getPoseProvider();	// Current robot position finder
+		Boolean passConfirmed = false;						// Network/ball pass confirmed from the robot with the ball.
 		
 		// Kicker waiting for pass
 		if(!ballFinder.getPassState()){
 			roboMotor.goTo(20, 0);
+			
+			// Wait for the robot to move to the requested location
 			while(roboMotor.isMoving()){
 				Delay.msDelay(50);
 			}
@@ -115,47 +122,53 @@ public class GeneralPlayer {
 			ballFinder.turnToBall(false);
 			// ball found, so go to the ball
 			//ballFinder.goToBall();
-		
+			//
 			while(!ballFinder.goToBall()){
 				//ballFinder.turnToBall(true);
 				ballFinder.turnToBall(false);
 				System.out.println("Goto Ball");
 			}
+			// The second player has the ball and is going to the goal
+			if(passConfirmed){
+				// Turn to the goal (forward)
+				// Go to the goal ( go forward until red or green are hit)
+				roboMotor.clearPath();
+				goalFinder.gotoGoal();
+				ballFinder.kickBall();
+			}
 		}
 		
 		System.out.println("PASSED STATE: "+ballFinder.getPassState());
 		
-		// The initial player has the ball and needs to send it's position to the other player
+		// The initial player has the ball and needs to send its position to the other player
 		if(ballFinder.getPassState()){
 			try {
 				botComm.sendPosition(roboPos.getPose().getX()+xPosOffset, roboPos.getPose().getY()+yPosOffset);
 				otherBotPos = botComm.getBotPos();
 				System.out.println(otherBotPos[0]+" -- "+otherBotPos[1]);
 				ballFinder.turnToPlayer(otherBotPos[0], otherBotPos[1]);
-				/*System.out.println("!!!ABOUT TO PASS!!!");
-				Delay.msDelay(5000);
+				System.out.println("!!!ABOUT TO PASS!!!");
+				//Delay.msDelay(5000);
 				ballFinder.kickBall();
-				Delay.msDelay(500);*/
+				Delay.msDelay(500);
 				roboMotor.clearPath();
 				botComm.sendMessage("PASSED");
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			Delay.msDelay(5000);
+			//Delay.msDelay(5000);
 		}
 		
 		
-		// Turn to the goal (forward)
-		// Go to the goal ( go forward until red or green are hit)
-		/*goalFinder.gotoGoal();
-		ballFinder.kickBall();
+		
 		
 		// TEMP: GOTO home position after kick to the goal
+		roboMotor.clearPath();
 		roboMotor.goTo(0, 0);
 		while(roboMotor.isMoving()){
 			Delay.msDelay(50);
-		}*/
+		}
 		// Turn to the goal (forward)
 
 		// Go back to wondering for the ball

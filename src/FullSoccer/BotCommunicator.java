@@ -13,8 +13,8 @@ import java.util.Map;
 public class BotCommunicator {
 	private ServerSocket servSocket;
 	private Socket clientSocket;
-	private Map<Integer, String> teamList;
-	private Map<Integer, String> oponentList;
+	//private Map<Integer, String> teamList;
+	//private Map<Integer, String> oponentList;
 	
 	private static final int port = 1234;
 	private String serverIp = "192.168.43.31";
@@ -22,7 +22,7 @@ public class BotCommunicator {
 	private InputStream inStream;
 	private DataInputStream dataInput;
 	private DataOutputStream dataOutput;
-	private Boolean isServer = false;
+	private boolean isServer = false;
 	
 	public BotCommunicator(boolean server){
 		isServer = server;
@@ -121,10 +121,13 @@ public class BotCommunicator {
 		return botPos;
 	}
 	
+	// Wait for the other player to pass the ball
 	public boolean passConfirmed() throws IOException{
 		String passed = "";
 		passed = recieveMessage();
-		if(passed == "PASSED"){
+		System.out.println("RES: \n"+passed);
+		// Check if the other robot set a passed signal
+		if(passed.contains("PASSED")){
 			return true;
 		}
 		return false;

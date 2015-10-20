@@ -33,41 +33,51 @@ import lejos.utility.Delay;
 import lejos.hardware.sensor.*;
 
 public class BallFinder {
-	private EV3UltrasonicSensor sonarSensor;	// Sonar sensor
+	private EV3UltrasonicSensor sonarSensor;	// Actual Sonar sensor
 	private EV3MediumRegulatedMotor arm;		// Arm -- not used at the moment due to blocking API
 	//private EV3IRSensor irDistSensor;
-	private HiTechnicIRSeekerV2 irSensor;
-	private SampleProvider irSeekModeMod;
-	private SampleProvider irSeekModeUnMod;
-	private SampleProvider distMode;
-	private float[] distanceSample;
-	private float[] irSample;
+	private HiTechnicIRSeekerV2 irSensor;		// Actual IR Seeker
+	private SampleProvider irSeekModeMod;		// Gets value for modulated IR
+	private SampleProvider irSeekModeUnMod;		// Gets value for unmodulated IR
+	private SampleProvider distMode;			// Gets value for sonar
+	private float[] distanceSample;				// The actual sonar value -- RAW
+	private float[] irSample;					// The actual IR value -- RAW
+	private float ballDirMod = 0;				// The current modulated IR angle
+	private float ballDirUnMod = 0;				// The current unmodulated IR angle
+	public static final int AREA_WIDTH = 100;	// Width of the soccer field
+	public static final int AREA_LENGTH = 150;	// Length of the soccer field
+	private final float BALL_SONAR_DIST_GRAB = (float) 0.08;	// Sonar value threshold for grabbing the ball
+	private Navigator roboMotor;				// Controls robot motion in the field/grid
+	private boolean armOpen = true;				// Verifies that the arm is in a ready state for a grab
+	private ColorDetector colorDetector;		// Checks for edges and goal lines
+	private boolean modInFront = false;			// 0.0 modulated IR => true
+	private boolean unModInFront = false;		// 0.0 unmodulated IR => true
+	private boolean passState = false;			// True => the robot should pass the ball once it has it.
 	
-	private float ballDirMod = 0;
-	private float ballDirUnMod = 0;
-	
-	private boolean hasBall = false;
-	public static final int AREA_WIDTH = 100;
-	public static final int AREA_LENGTH = 150;
-	private boolean ballInFront;
-	private final float BALL_SONAR_DIST_GRAB = (float) 0.08;
+	// !!!PENDING REMOVAL CLASS VARIABLES!!!:
 	//private boolean exit = false;
-	private Navigator roboMotor;
-	private DifferentialPilot diffPilot;
+	//private boolean ballInFront;
+	//private boolean hasBall = false;
+	//private final float BALL_DETECT_DIST = (float) 1.0;
 	//private OdometryPoseProvider odomPilot;
 	//private float currDir = 0;
-	private boolean armOpen = true;
-	private ColorDetector colorDetector;
-	private boolean turnHitPreviously = false;
-	private float lastTurnDir = 0;
-	//private final float BALL_DETECT_DIST = (float) 1.0;
+	private DifferentialPilot diffPilot;		// REMOVAL PENDING
+	private boolean modInRange = false;			// REMOVAL PENDING
+	private boolean unModInRange = false;		// REMOVAL PENDING
+	private boolean turnHitPreviously = false;	// REMOVAL PENDING
+	private float lastTurnDir = 0;				// REMOVAL PENDING
 	
-	private boolean modInFront = false;
-	private boolean modInRange = false;
-	private boolean unModInFront = false;
-	private boolean unModInRange = false;
-	private boolean passState = false;
-		
+	
+	// BallFinder Constructor:
+	/*
+	 * Needs	sonar port
+	 * 			touchPort -- PENDING REMOVAL
+	 * 			Navigator
+	 * 			Odometry Position Provider
+	 * 			Differential Pilot -- PENDING REMOVAL
+	 * 			EV3 ARM -- Not currently used, but may be later
+	 * 			Color Detector
+	 */
 	public BallFinder(Port sonarPort,Port seekerPort,Port touchPort,Navigator nav, OdometryPoseProvider odomPilot,DifferentialPilot dPilot,EV3MediumRegulatedMotor newArm, ColorDetector cDetect){
 		sonarSensor = new EV3UltrasonicSensor(sonarPort);
 		irSensor = new HiTechnicIRSeekerV2(seekerPort);
@@ -76,8 +86,8 @@ public class BallFinder {
 		irSeekModeMod = irSensor.getModulatedMode();
 		irSeekModeUnMod = irSensor.getUnmodulatedMode();
 		irSample = new float[irSeekModeMod.sampleSize()];
-		hasBall = false;
-		ballInFront = false;
+		//hasBall = false;
+		//ballInFront = false;
 		roboMotor = nav;
 		diffPilot = dPilot;
 		arm = newArm;
@@ -96,7 +106,7 @@ public class BallFinder {
 	}
 	
 	// Get the ball angle relative to the robot
-	public float fetchAngleVal(Boolean modulated){
+	public float fetchAngleVal(boolean modulated){
 		if(modulated)
 			irSeekModeMod.fetchSample(irSample, 0);
 		else
@@ -120,6 +130,21 @@ public class BallFinder {
 		/*vals[0] = ballDirMod;
 		vals[1] = ballDirUnMod;
 		return vals;*/
+	}
+	
+	// The navigator uses angles from -180 to 180 -- this corrects the ball ir reading
+	public float adjustedAngle(float requestedHeading/*float ballAngle, float robotHeading*/){
+		float adjustedHeading = 0;	// Corrected heading -- clip to -180 to 180
+		if(requestedHeading < 180){
+			adjustedHeading = -180 + (requestedHeading-180);
+		}
+		else if(requestedHeading > -180){
+			adjustedHeading = 180 + (requestedHeading+180);
+		}
+		else{
+			adjustedHeading = 180;
+		}
+		return adjustedHeading;
 	}
 	
 	public boolean ballInFront(){
@@ -159,7 +184,7 @@ public class BallFinder {
 	
 	// Turn to the angle of the ball
 	public void turnToBall(boolean closeToBall){
-		float angleError = 30;	// Offest for the 
+		float angleError = -30;	// Offest for the 
 		//System.out.println(diffPilot.getAngleIncrement());
 		System.out.println("Turn To Ball");
 		
@@ -175,25 +200,30 @@ public class BallFinder {
 			// Modulated IR works better at a longer ball distance
 			// Turn to the ball based on the modulated IR value
 			if(!closeToBall && !Float.isNaN(ballDirMod)){
+				//ballDirMod = adjustedAngle(ballDirMod, roboPos.getHeading());
 				angleError = (ballDirMod/Math.abs(ballDirMod))*30;
-				roboMotor.goTo(roboPos.getX(), roboPos.getY(),roboPos.getHeading() + ballDirMod + angleError);
+				roboMotor.goTo(roboPos.getX(), roboPos.getY(),adjustedAngle(roboPos.getHeading() + ballDirMod + angleError));
 				System.out.println("TURNING M:  "+(ballDirMod + angleError));
 			}
 			// Unmodulated IR works better at closer ball distances
 			// Turn to the ball based on the unmodulated IR value
 			else if(closeToBall && !Float.isNaN(ballDirUnMod)){
+				//ballDirUnMod = adjustedAngle(ballDirUnMod, roboPos.getHeading());
 				angleError = (ballDirUnMod/Math.abs(ballDirUnMod))*30;
-				roboMotor.goTo(roboPos.getX(), roboPos.getY(),roboPos.getHeading()+ ballDirUnMod + angleError);
+				roboMotor.goTo(roboPos.getX(), roboPos.getY(),adjustedAngle(roboPos.getHeading()+ ballDirUnMod + angleError));
 				System.out.println("TURNING UM:  "+(ballDirUnMod + angleError));
 			}
 			// Invalid value for ball direction -- turn in the last known ball direction
 			else{
 				// 180 degrees in the last known ball direction
-				roboMotor.goTo(roboPos.getX(), roboPos.getY(),roboPos.getHeading()+angleError*6);
+				//roboMotor.goTo(roboPos.getX(), roboPos.getY(),roboPos.getHeading()+angleError*6);
+				roboMotor.goTo(roboPos.getX(), roboPos.getY(),adjustedAngle(roboPos.getHeading()+angleError*6));
+				
+				System.out.println("ELSE TURN:\n"+(angleError*6));
 			}
 			// Keep turning until the ball is in front or the set turn stops
 			while(!ballInFront() && roboMotor.isMoving()){
-				//Delay.msDelay(50);
+				Delay.msDelay(50);
 				//System.out.println("TEST");
 			}
 			roboMotor.stop();
@@ -219,9 +249,10 @@ public class BallFinder {
 		
 		roboMotor.getMoveController().setTravelSpeed(10);
 		
-		diffPilot.forward();
+		//diffPilot.forward();
+		roboMotor.getMoveController().forward();
 		while(distanceSample[0] > BALL_SONAR_DIST_GRAB && ballInFront()){}
-		roboMotor.stop();
+		roboMotor.getMoveController().stop();
 			/*ballX = (float) (distanceSample[0]*Math.cos(roboPos.getHeading()));
 			ballY = (float) (distanceSample[0]*Math.sin(roboPos.getHeading()));
 			roboMotor.goTo(ballX,ballY);*/
@@ -246,6 +277,14 @@ public class BallFinder {
 		}
 	}
 	
+	// The robot is at the ball, so grab it
+	public void closeArm(){
+		System.out.println("Close: " + armOpen);
+		if(armOpen){
+			armOpen = false;
+			Motor.B.rotate(200);
+		}
+	}
 	
 	public void turnToPlayer(float otherBotPos, float otherBotPos2){
 		roboMotor.clearPath();
@@ -253,6 +292,7 @@ public class BallFinder {
 		PoseProvider currPose = this.roboMotor.getPoseProvider();
 		Waypoint otherPos = new Waypoint(otherBotPos,otherBotPos2);
 		Waypoint currPos = new Waypoint(currPose.getPose());
+		// !!!NOTE!!! -- ADJUSTED HEADING USED -- VERIFY WORKING
 		roboMotor.goTo(currPose.getPose().getX(),currPose.getPose().getY(),currPos.angleTo(otherPos));
 		float minHeading = (float) (currPos.angleTo(otherPos)-0.09);
 		float maxHeading = (float) (currPos.angleTo(otherPos)+0.09);
@@ -273,23 +313,26 @@ public class BallFinder {
 	public void openArm(){
 		System.out.println("Open: " + armOpen);
 		if(!armOpen){
-			Motor.B.rotate(-170);
+			Motor.B.rotate(-190);
 			armOpen = true;
 		}
 	}
 	
 	// Kick the ball -- timing might need some work
 	public void kickBall(){
+		openArm();
 		roboMotor.getMoveController().backward();
-		Delay.msDelay(1500);
+		Delay.msDelay(1000);
 		// Go to the goal to shoot (assuming that the robot still has the ball)
-		openArm();
-		roboMotor.getMoveController().backward();
-		Delay.msDelay(10);
-		grabBall();
+		
+		/*roboMotor.getMoveController().backward();
+		Delay.msDelay(10);*/
+		roboMotor.getMoveController().stop();
+		closeArm();
 		roboMotor.getMoveController().forward();
-		Delay.msDelay(1400);
+		Delay.msDelay(1200);
 		openArm();
+		roboMotor.getMoveController().stop();
 	}
 
 	

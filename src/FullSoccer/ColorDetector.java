@@ -13,9 +13,9 @@ import lejos.robotics.Color;
 import lejos.robotics.SampleProvider;
 
 public class ColorDetector {
-	public EV3ColorSensor colorSensor;		// Main color sensor
-	public SampleProvider colorDataProvider;// Data collector from the color sensor
-	public float[] colorSample;				// Result of data collection from the color sensor
+	private EV3ColorSensor colorSensor;		// Main color sensor
+	private SampleProvider colorDataProvider;// Data collector from the color sensor
+	private float[] colorSample;				// Result of data collection from the color sensor
 	
 	// Constructor for the ColorDetector
 	public ColorDetector(Port colorSensorPort) {
@@ -27,7 +27,7 @@ public class ColorDetector {
 	// Check if the robot is in a shooting range of the goal (or if goalie is still in the goal)	
 	public boolean atEdgeOfGoal(){
 		colorDataProvider.fetchSample(colorSample, 0);
-		System.out.println("Color:" + colorSample);
+		//System.out.println("Color:" + colorSample);
 		if((int) colorSample[0] == 0 /*|| colorSample[0] == Color.GREEN*/)
 			return true;
 		else
@@ -35,13 +35,13 @@ public class ColorDetector {
 	}
 	
 	// Check if the robot is at the edge of the board	
-		public boolean atEdgeOfBoard(){
-			colorDataProvider.fetchSample(colorSample, 0);
-			if((int) colorSample[0] == Color.BLACK /*|| colorSample[0] == Color.GREEN*/)
-				return true;
-			else
-				return false;
-		}
+	public boolean atEdgeOfBoard(){
+		colorDataProvider.fetchSample(colorSample, 0);
+		if((int) colorSample[0] == Color.BLACK /*|| colorSample[0] == Color.GREEN*/)
+			return true;
+		else
+			return false;
+	}
 
 	public void stop(){
 		colorSensor.close();
