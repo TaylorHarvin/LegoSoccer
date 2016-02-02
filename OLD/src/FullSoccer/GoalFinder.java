@@ -17,15 +17,13 @@ public class GoalFinder {
 		colorDetector = cDetect;
 		xPosOffset = xOffset;
 		//yPosOffset = yOffset;
-		// Client player
 		if(xOffset == 0 && yOffset == 0){
 			xPosOffset = goalX;
 			yPosOffset = goalY;
 		}
-		// Server player
 		else{
 			xPosOffset = (float) (40.0*.775);
-			yPosOffset = (float) ((27.0-5)*0.775);
+			yPosOffset = (float) (27.0*0.775);
 		}
 		/*if(yOffset < goalY){
 			//yPosOffset = Math.abs((Math.abs(goalY)-Math.abs(yOffset)));

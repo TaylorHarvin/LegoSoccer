@@ -28,7 +28,7 @@ public class ColorDetector {
 	public boolean atEdgeOfGoal(){
 		colorDataProvider.fetchSample(colorSample, 0);
 		//System.out.println("Color:" + colorSample);
-		if((int) colorSample[0] == 2 /*|| colorSample[0] == Color.GREEN*/)
+		if((int) colorSample[0] == 0 /*|| colorSample[0] == Color.GREEN*/)
 			return true;
 		else
 			return false;

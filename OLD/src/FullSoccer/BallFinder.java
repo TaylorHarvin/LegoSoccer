@@ -61,6 +61,7 @@ public class BallFinder {
 	//private final float BALL_DETECT_DIST = (float) 1.0;
 	//private OdometryPoseProvider odomPilot;
 	//private float currDir = 0;
+	private DifferentialPilot diffPilot;		// REMOVAL PENDING
 	private boolean modInRange = false;			// REMOVAL PENDING
 	private boolean unModInRange = false;		// REMOVAL PENDING
 	private boolean turnHitPreviously = false;	// REMOVAL PENDING
@@ -77,7 +78,7 @@ public class BallFinder {
 	 * 			EV3 ARM -- Not currently used, but may be later
 	 * 			Color Detector
 	 */
-	public BallFinder(Port sonarPort,Port seekerPort,Port touchPort,Navigator nav,EV3MediumRegulatedMotor newArm, ColorDetector cDetect){
+	public BallFinder(Port sonarPort,Port seekerPort,Port touchPort,Navigator nav, OdometryPoseProvider odomPilot,DifferentialPilot dPilot,EV3MediumRegulatedMotor newArm, ColorDetector cDetect){
 		sonarSensor = new EV3UltrasonicSensor(sonarPort);
 		irSensor = new HiTechnicIRSeekerV2(seekerPort);
 		distMode = sonarSensor.getDistanceMode();
@@ -88,6 +89,7 @@ public class BallFinder {
 		//hasBall = false;
 		//ballInFront = false;
 		roboMotor = nav;
+		diffPilot = dPilot;
 		arm = newArm;
 		colorDetector = cDetect;
 	}
@@ -186,7 +188,7 @@ public class BallFinder {
 		//System.out.println(diffPilot.getAngleIncrement());
 		System.out.println("Turn To Ball");
 		
-		roboMotor.getMoveController().setLinearSpeed(10);
+		roboMotor.getMoveController().setTravelSpeed(10);
 		Pose roboPos = roboMotor.getPoseProvider().getPose();
 		getAllIrSig();
 		//roboMotor.rotateTo(currDir+ballDir);
@@ -245,7 +247,7 @@ public class BallFinder {
 		//float currBallDist = fetchSonarVal();
 		//Pose roboPos = roboMotor.getPoseProvider().getPose();
 		
-		roboMotor.getMoveController().setLinearSpeed(10);
+		roboMotor.getMoveController().setTravelSpeed(10);
 		
 		//diffPilot.forward();
 		roboMotor.getMoveController().forward();
