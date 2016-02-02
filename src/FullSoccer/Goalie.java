@@ -1,16 +1,20 @@
 package FullSoccer;
 
 import lejos.hardware.Button;
+import lejos.hardware.motor.Motor;
 import lejos.hardware.port.MotorPort;
 import lejos.hardware.port.SensorPort;
 import lejos.hardware.sensor.HiTechnicCompass;
 import lejos.hardware.sensor.SensorMode;
+import lejos.robotics.localization.OdometryPoseProvider;
+import lejos.robotics.navigation.DifferentialPilot;
+import lejos.robotics.navigation.Navigator;
 import lejos.utility.Delay;
 
 public class Goalie {
-	/*public SoccerMotorMotion roboMotor;		// Motor control for all of the motors
-	public BallFinder ballFinder;			// A helper for soccer ball locating on the board
-	public ColorDetector colorDetector;		// A helper for locating the position of the robot on the board
+	private Navigator roboMotor;		// Motor control for all of the motors
+	private BallFinder ballFinder;			// A helper for soccer ball locating on the board
+	private ColorDetector colorDetector;		// A helper for locating the position of the robot on the board
 	private int lastMovingDir;
 	private int goalColorTriggeredDir;
 	private boolean haltForEdge;
@@ -19,17 +23,19 @@ public class Goalie {
 	
 	// Constructor for the GeneralPlayer
 	public Goalie(){
-		roboMotor = new SoccerMotorMotion(MotorPort.A,MotorPort.D, MotorPort.B);
-		ballFinder = new BallFinder(SensorPort.S2,SensorPort.S3,null,roboMotor);
-		ballFinder.setBallInFrontMin(0.081);
+		DifferentialPilot diffPilot = new DifferentialPilot(3.348, 15.2,Motor.A,Motor.D);
+		OdometryPoseProvider odomPilot = new OdometryPoseProvider (diffPilot);
+		//arm = null;
+		roboMotor = new Navigator(diffPilot);
+		roboMotor.setPoseProvider(odomPilot);
 		colorDetector = new ColorDetector(SensorPort.S1);
 		haltForEdge = false;
 		goalColorTriggeredDir = 0;
 	}
 	
 	public void start(){
-		boolean tempGoalCheck = false;
-		roboMotor.hitBall();
+		/*boolean tempGoalCheck = false;
+		ballFinder.hitBall();
 		// Continue as goalie until  enter is pressed
 		while(!Button.ENTER.isDown()){
 			
@@ -54,6 +60,6 @@ public class Goalie {
 				roboMotor.goalieKick();
 			}
 			
-		}
-	}*/
+		}*/
+	}
 }

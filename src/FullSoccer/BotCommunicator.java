@@ -17,7 +17,7 @@ public class BotCommunicator {
 	//private Map<Integer, String> oponentList;
 	
 	private static final int port = 1234;
-	private String serverIp = "192.168.43.31";
+	private String serverIp = "192.168.43.228";
 	private OutputStream outStream;
 	private InputStream inStream;
 	private DataInputStream dataInput;
@@ -31,15 +31,15 @@ public class BotCommunicator {
 				setSocketType(isServer);
 				setupInBuffer();
 				setupOutBuffer();
-				sendMessage("Test from EV3 SERV");
-				System.out.println(recieveMessage());
+				//sendMessage("Test from EV3 SERV");
+				//System.out.println(receiveMessage());
 			}
 			else{
 				setSocketType(isServer);
 				setupInBuffer();
 				setupOutBuffer();
-				System.out.println(recieveMessage());
-				sendMessage("Test from Client");
+				//System.out.println(receiveMessage());
+				//sendMessage("Test from Client");
 			}
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -47,7 +47,11 @@ public class BotCommunicator {
 		}
 		//teamList.
 	}
+	
+	// Establish connection with other robot and setup the socket
+	// for communication
 	public void setSocketType(boolean server) throws IOException{
+		// Attempt to establish the connection with the other robot
 		if(server){
 			servSocket = new ServerSocket(port);
 			System.out.println("Waiting for Client");
@@ -62,6 +66,9 @@ public class BotCommunicator {
 	
 	public void setupOutBuffer() throws IOException{
 		if(isServer){
+			// !!!NOT TESTED YET!!!
+			while(!clientSocket.isConnected()){}
+			// ^^^!!!NOT TESTED YET!!!^^^
 			outStream = clientSocket.getOutputStream();
 			dataOutput = new DataOutputStream(outStream);
 		}
@@ -90,7 +97,7 @@ public class BotCommunicator {
 	}
 	
 	
-	public String recieveMessage() throws IOException{
+	public String receiveMessage() throws IOException{
 		return dataInput.readUTF();
 	}
 	
@@ -112,7 +119,7 @@ public class BotCommunicator {
 	}
 	
 	public float[] getBotPos() throws IOException{
-		String otherBotPos = recieveMessage();
+		String otherBotPos = receiveMessage();
 		float botPos[] = new float[2];
 		int xySplit = 0;
 		xySplit = otherBotPos.indexOf(",");
@@ -124,7 +131,7 @@ public class BotCommunicator {
 	// Wait for the other player to pass the ball
 	public boolean passConfirmed() throws IOException{
 		String passed = "";
-		passed = recieveMessage();
+		passed = receiveMessage();
 		System.out.println("RES: \n"+passed);
 		// Check if the other robot set a passed signal
 		if(passed.contains("PASSED")){
