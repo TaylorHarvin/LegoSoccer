@@ -22,11 +22,8 @@ public class PlayerInit {
 		//switch(robotChoice){
 			//case Button.ID_UP:
 				System.out.println("Player 1 Selected");
-				mainSC = new SensorControl(SensorPort.S2, SensorPort.S3);
-				mainMC = new MotionControl(new EV3LargeRegulatedMotor(MotorPort.A), new EV3LargeRegulatedMotor(MotorPort.D), mainSC);
-				
-				mainMC.FindAndGrabBall();
-				
+				Kicker robot = new Kicker();
+				robot.Play();
 				
 		//		break;
 		//}

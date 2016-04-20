@@ -1,3 +1,4 @@
+import globals.SoccerGlobals;
 import lejos.hardware.motor.EV3MediumRegulatedMotor;
 import lejos.hardware.port.Port;
 import lejos.hardware.sensor.EV3UltrasonicSensor;
@@ -123,7 +124,7 @@ public class SensorControl {
 				unModInRange = true;
 			}*/
 		}
-		if((modInFront || unModInFront) /*|| (modInFront && unModInRange)||(unModInFront && modInRange)*/)
+		if((modInFront || unModInFront || sonar < SoccerGlobals.SONAR_OBJECT_SEEN) /*|| (modInFront && unModInRange)||(unModInFront && modInRange)*/)
 			ballFound = true;
 		//System.out.println(ballFound);
 		return ballFound;

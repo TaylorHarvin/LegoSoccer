@@ -1,4 +1,9 @@
+import globals.SoccerGlobals;
+import lejos.hardware.motor.EV3LargeRegulatedMotor;
+import lejos.hardware.motor.EV3MediumRegulatedMotor;
 import lejos.hardware.motor.Motor;
+import lejos.hardware.motor.UnregulatedMotor;
+import lejos.hardware.port.MotorPort;
 import lejos.robotics.RegulatedMotor;
 import lejos.robotics.chassis.Chassis;
 import lejos.robotics.chassis.Wheel;
@@ -12,9 +17,11 @@ import lejos.robotics.navigation.Waypoint;
 import lejos.utility.Delay;
 
 public class MotionControl {
+	private final int MAX_GOTO_TRY = 50;
 	private CompassPoseProvider compassProv;
 	private MovePilot movePilot;
 	private Navigator roboMotor;			// Grid navigation handler
+	private UnregulatedMotor arm;
 	PoseProvider posProv;
 	SensorControl mainSC;
 	MoveController baseMC;
@@ -30,18 +37,38 @@ public class MotionControl {
 		movePilot = new MovePilot(chassis);
 		movePilot.setAngularSpeed(20);
 		roboMotor = new Navigator(movePilot);
+		arm = new UnregulatedMotor(MotorPort.C);
+		arm.setPower(15);
 		posProv = roboMotor.getPoseProvider();
 		mainSC = sc;
 		
 		baseMC = roboMotor.getMoveController();
 	}
 	
-	public boolean GotoWaypoint(Waypoint destination, boolean fullControl){
+	public void DribbleBall(){
+		arm.backward();
+		Delay.msDelay(300);
+		arm.forward();
+		Delay.msDelay(300);
+	}
+	
+	
+	public boolean GotoWaypoint(Waypoint destination, boolean withBall){
 		roboMotor.goTo(destination);
+		float prevHeading = -1;
+		float currHeading = -1;
+		
 		// Allow the motion controller to determine full actions while going to waypoint
-		if(fullControl){
-			while(roboMotor.isMoving()){
+		if(withBall){
+			while(roboMotor.isMoving()/* && mainSC.BallInFront()*/){
 				Delay.msDelay(50);
+				currHeading = posProv.getPose().getHeading();
+				
+				if(Math.abs(prevHeading-currHeading) < 0.05){
+					// Dribble ball -- slight tap
+					DribbleBall();
+				}
+				prevHeading = currHeading;
 			}
 		}
 		return true;
@@ -81,12 +108,14 @@ public class MotionControl {
 			ballLoc = ballLoc + 180;
 		}
 		System.out.println("Final: " + ballLoc);
-		this.GotoWaypoint(new Waypoint(this.GetRobotX(),this.GetRobotY(),ballLoc), true);
+		this.GotoWaypoint(new Waypoint(this.GetRobotX(),this.GetRobotY(),ballLoc), false);
 		while(!mainSC.BallInFront() && roboMotor.isMoving()){
 			Delay.msDelay(50);
 		}
-		if(mainSC.BallInFront())
+		if(mainSC.BallInFront()){
+			StopMotion();
 			return true;
+		}
 		else
 			return false;
 	}
@@ -118,16 +147,28 @@ public class MotionControl {
 	public boolean FindAndGrabBall(){
 		boolean ballGrabbable = false;
 		boolean ballInFront = false;
-		while(!ballGrabbable){
+		int gotoTry = 0;
+		
+		while(!ballGrabbable && gotoTry < MAX_GOTO_TRY){
 			// If the ball is in front of the robot -- goto it
-			if(ballInFront)
+			if(ballInFront){
 				ballGrabbable = GotoBall();
+				gotoTry++;
+			}
 			//
 			if(!ballGrabbable)
 				ballInFront = this.TurnToBall();
 		}
 		
-		return true;
+		return ballGrabbable;
+	}
+	
+	public void KickBall(){
+		arm.setPower(100);
+		arm.backward();
+		Delay.msDelay(800);
+		arm.forward();
+		Delay.msDelay(800);
 	}
 	
 }
