@@ -1,0 +1,34 @@
+// From LTL 1 -- intended to be used with after advice
+// 1. Ball remains in front of the robot during goto ball
+
+// NOTE:  LOGIC WORKS, BUT MAY NEED ALTERATIONS FOR JAVAMOP COMPILER
+package mop;
+
+import java.io.*;
+import java.util.*;
+import fullSoccer.*;
+import fullSoccer.Kicker;
+//import lejos.robotics.navigation.Navigator;
+
+BallInFrontAtGotoBall() {
+	
+	event gotoball before():
+		call(public ** GotoBall()){}
+		
+	event ballinfronttrue after() returning (boolean res):
+		call(public boolean BallInFront()) && condition(res){
+			System.out.println("Ball in front true");
+		}
+		
+	event ballinfrontfalse after() returning (boolean res):
+		call(public boolean BallInFront()) && condition(!res){
+			System.out.println("Ball in front false");
+		}
+
+	ltl: [](gotoball => (*) ballinfronttrue)
+	@violation { 
+		System.out.println("!!!BallInFrontAtGoto FAIL!!!");
+	}
+
+}
+
