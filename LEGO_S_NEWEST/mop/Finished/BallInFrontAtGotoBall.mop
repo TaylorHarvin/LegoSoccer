@@ -1,0 +1,47 @@
+// From LTL 1 
+// 1. Ball remains in front of the robot during goto ball
+
+package mop;
+
+import java.io.*;
+import java.util.*;
+import fullSoccer.*;
+
+BallInFrontAtGotoBall(MotionControl MC) {
+	MotionControl currMC = null; // Allows for usage of MC in the ltl violation
+	
+	// Handle for the gotoball event
+	event gotoball after(MotionControl MC) :
+		call(public boolean GotoBall()) && target(MC){
+			System.out.println("Goto Ball EVENT");
+			
+			// Allows usage of MC in the LTL violation if needed
+			currMC = MC;
+		}
+	
+	// Handle for the ball in front event
+	event ballinfront after(MotionControl MC) returning (boolean res):
+		call(public boolean BallInFront()) && condition(res) && this(MC){
+			System.out.println("Ball in front: "+ res);
+			/*if(!res){
+				MC.FindAndGrabBall();
+			}*/
+		}
+		
+	/*event ballinfrontfalse after(MotionControl MC) returning (boolean res) :
+		call(public boolean BallInFront()) && condition(!res) && this(MC){
+			System.out.println("Ball in front false");
+		}*/
+
+	ltl: [](gotoball => [] (ballinfront))
+	//ltl: [](gotoball U (not ballinfront))
+	@violation { 
+		System.out.println("!!!BallInFrontAtGoto LTL FAIL!!!");
+		System.out.println("Re-Attempting FindAndGrabBall");
+		//MC.FindAndGrabBall();
+		currMC.FindAndGrabBall();
+		__RESET;	// This is supposed to reset the monitor
+	}
+
+}
+

@@ -22,7 +22,7 @@ public class SensorControl {
 	private SampleProvider distMode;			// Gets value for sonar
 	private float[] distanceSample;				// The actual sonar value -- RAW
 	private float[] irSample;					// The actual IR value -- RAW
-	private final float BALL_SONAR_DIST_GRAB = (float) 0.08;	// Sonar value threshold for grabbing the ball
+	public final float BALL_SONAR_DIST_GRAB = (float) 0.08;	// Sonar value threshold for grabbing the ball
 	public HiTechnicCompass compassSensor;
 	public SampleProvider compassSP;
 	

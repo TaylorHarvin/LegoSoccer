@@ -16,7 +16,7 @@ public class Kicker {
 	}
 	
 	// Look around for the ball
-	private boolean Wonder(){
+	public boolean Wonder(){
 		/*boolean ballInFront = mainMC.GotoBall();
 		while(!ballInFront){
 			System.out.println("GOTO RES 1: "+ ballInFront);
@@ -35,19 +35,23 @@ public class Kicker {
 		//return true;
 	}
 	
-	private boolean GotoGoal(boolean withBall){
+	public boolean GotoGoal(boolean withBall){
 		return mainMC.GotoWaypoint(new Waypoint(SoccerGlobals.GOAL_LOCATION.getX(),SoccerGlobals.GOAL_LOCATION.getY()), withBall);
 		
 	}
 	
 	public void Play(){
 		boolean ballKickedToGoal = false;
+		boolean triggerLTLViolation = true;
 		//Wonder();
 		while(!ballKickedToGoal){
 			// The ball was found, bring it to the goal
 			if(Wonder()){
 				System.out.println("Wonder Worked");
-				ballKickedToGoal = GotoGoal(true);
+				if(!triggerLTLViolation)
+					ballKickedToGoal = GotoGoal(true);
+				else
+					ballKickedToGoal = true;
 				//mainMC.StartMotionForward();
 				//mainMC.KickBall();
 			}
@@ -55,7 +59,7 @@ public class Kicker {
 		}
 		//System.out.println("Goal Shot: " + GotoGoal(true));
 		//mainMC.DribbleBall();
-		//System.out.println(mainSC.GetBallDirection());
+		System.out.println(mainSC.GetBallDirection());
 	}
 	
 	// PURE TEST
