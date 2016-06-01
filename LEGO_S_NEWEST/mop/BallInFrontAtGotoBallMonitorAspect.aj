@@ -25,7 +25,7 @@ final class BallInFrontAtGotoBallMonitor_Set extends com.runtimeverification.rvm
 		this.size = 0;
 		this.elements = new BallInFrontAtGotoBallMonitor[4];
 	}
-	final void event_gotoball(MotionControl MC) {
+	final void event_gotoball(MotionControl MC, boolean gotoRes) {
 		int numAlive = 0 ;
 		for(int i = 0; i < this.size; i++){
 			BallInFrontAtGotoBallMonitor monitor = this.elements[i];
@@ -34,7 +34,7 @@ final class BallInFrontAtGotoBallMonitor_Set extends com.runtimeverification.rvm
 				numAlive++;
 
 				final BallInFrontAtGotoBallMonitor monitorfinalMonitor = monitor;
-				monitor.Prop_1_event_gotoball(MC);
+				monitor.Prop_1_event_gotoball(MC, gotoRes);
 				if(monitorfinalMonitor.Prop_1_Category_violation) {
 					monitorfinalMonitor.Prop_1_handler_violation();
 				}
@@ -122,10 +122,16 @@ class BallInFrontAtGotoBallMonitor extends com.runtimeverification.rvmonitor.jav
 		return nextstate;
 	}
 
-	final boolean Prop_1_event_gotoball(MotionControl MC) {
+	final boolean Prop_1_event_gotoball(MotionControl MC, boolean gotoRes) {
 		{
-			System.out.println("Goto Ball EVENT");
-			currMC = MC;
+			if ( ! (gotoRes) ) {
+				return false;
+			}
+			{
+				currMC = MC;
+				System.out.println("Goto Ball EVENT: " + gotoRes);
+				System.out.println("Ball in front:" + MC.mainSC.BallInFront());
+			}
 		}
 
 		int nextstate = this.handleEvent(0, Prop_1_transition_gotoball) ;
@@ -140,6 +146,7 @@ class BallInFrontAtGotoBallMonitor extends com.runtimeverification.rvmonitor.jav
 				return false;
 			}
 			{
+				currMC = MC;
 				System.out.println("Ball in front: " + res);
 			}
 		}
@@ -154,7 +161,7 @@ class BallInFrontAtGotoBallMonitor extends com.runtimeverification.rvmonitor.jav
 		{
 			System.out.println("!!!BallInFrontAtGoto LTL FAIL!!!");
 			System.out.println("Re-Attempting FindAndGrabBall");
-			currMC.FindAndGrabBall();
+			currMC.TurnToBall();
 			this.reset();
 		}
 
@@ -243,7 +250,7 @@ class BallInFrontAtGotoBallRuntimeMonitor implements com.runtimeverification.rvm
 		RuntimeOption.enableFineGrainedLock(false) ;
 	}
 
-	public static final void gotoballEvent(MotionControl MC) {
+	public static final void gotoballEvent(MotionControl MC, boolean gotoRes) {
 		BallInFrontAtGotoBall_activated = true;
 		while (!BallInFrontAtGotoBall_RVMLock.tryLock()) {
 			Thread.yield();
@@ -279,7 +286,7 @@ class BallInFrontAtGotoBallRuntimeMonitor implements com.runtimeverification.rvm
 		}
 		// D(X) main:8--9
 		final BallInFrontAtGotoBallMonitor matchedEntryfinalMonitor = matchedEntry;
-		matchedEntry.Prop_1_event_gotoball(MC);
+		matchedEntry.Prop_1_event_gotoball(MC, gotoRes);
 		if(matchedEntryfinalMonitor.Prop_1_Category_violation) {
 			matchedEntryfinalMonitor.Prop_1_handler_violation();
 		}
@@ -370,8 +377,8 @@ public aspect BallInFrontAtGotoBallMonitorAspect implements com.runtimeverificat
 
 	pointcut MOP_CommonPointCut() : !within(com.runtimeverification.rvmonitor.java.rt.RVMObject+) && !adviceexecution() && BaseAspect.notwithin();
 	pointcut BallInFrontAtGotoBall_gotoball(MotionControl MC) : (call(public boolean GotoBall()) && target(MC)) && MOP_CommonPointCut();
-	after (MotionControl MC) : BallInFrontAtGotoBall_gotoball(MC) {
-		BallInFrontAtGotoBallRuntimeMonitor.gotoballEvent(MC);
+	after (MotionControl MC) returning (boolean gotoRes) : BallInFrontAtGotoBall_gotoball(MC) {
+		BallInFrontAtGotoBallRuntimeMonitor.gotoballEvent(MC, gotoRes);
 	}
 
 	pointcut BallInFrontAtGotoBall_ballinfront(MotionControl MC) : (call(public boolean BallInFront()) && this(MC)) && MOP_CommonPointCut();

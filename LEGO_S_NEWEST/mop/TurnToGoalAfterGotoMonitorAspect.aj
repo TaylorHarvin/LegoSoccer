@@ -80,8 +80,8 @@ class TurnToGoalAfterGotoMonitor extends com.runtimeverification.rvmonitor.java.
 
 	Kicker currMK = null;
 
-	static final int Prop_1_transition_gotogoal[] = {1, 1, 3, 3};;
-	static final int Prop_1_transition_wonder[] = {2, 0, 3, 3};;
+	static final int Prop_1_transition_gotogoal[] = {0, 0, 3, 3};;
+	static final int Prop_1_transition_wonder[] = {1, 2, 3, 3};;
 
 	volatile boolean Prop_1_Category_violation = false;
 

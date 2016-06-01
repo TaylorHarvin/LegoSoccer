@@ -42,14 +42,17 @@ public class Kicker {
 	
 	public void Play(){
 		boolean ballKickedToGoal = false;
-		boolean triggerLTLViolation = true;
+		boolean triggerLTLViolation = false;
 		//Wonder();
-		while(!ballKickedToGoal){
+		while(triggerLTLViolation || !ballKickedToGoal){
 			// The ball was found, bring it to the goal
 			if(Wonder()){
 				System.out.println("Wonder Worked");
-				if(!triggerLTLViolation)
-					ballKickedToGoal = GotoGoal(true);
+				if(!triggerLTLViolation){
+					// If the robot is in the goal range with the ball -- kick the ball to the goal
+					if(GotoGoal(true))
+						ballKickedToGoal = mainMC.KickAtGoal();
+				}
 				else
 					ballKickedToGoal = true;
 				//mainMC.StartMotionForward();

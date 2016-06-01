@@ -1,5 +1,5 @@
 // From LTL 3
-// 3. Robot turns to the goal  when GOTO ball/Wonder success
+// Robot turns to the goal  when GOTO ball/Wonder success
 
 package mop;
 
@@ -31,7 +31,8 @@ TurnToGoalAfterGoto(Kicker MK) {
 	//		 naturally in our basic setup, but a triggerLTLViolation flag
 	//		 can be set to true to bypass GotoGoal(..), which will simulate the violation
 	//		 and allow for handling below
-	ltl: [](wonder => (*) gotogoal)
+	//ltl: [](wonder => (*) gotogoal)
+	ltl: [](wonder => (o gotogoal))
 	@violation {
 		//Kicker MK = new Kicker();
 		//_MONITOR.currMK.GotoGoal(true);

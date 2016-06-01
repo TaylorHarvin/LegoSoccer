@@ -80,10 +80,12 @@ class HasBallAtKickMonitor extends com.runtimeverification.rvmonitor.java.rt.tab
 
 	float sonarVal = 9999;
 
+	boolean ballClose = false;
+
 	MotionControl currMC = null;
 
-	static final int Prop_1_transition_kicking[] = {1, 2, 2};;
-	static final int Prop_1_transition_ballkickable[] = {0, 2, 2};;
+	static final int Prop_1_transition_kicking[] = {2, 0, 3, 3};;
+	static final int Prop_1_transition_ballkickable[] = {1, 1, 3, 3};;
 
 	volatile boolean Prop_1_Category_violation = false;
 
@@ -127,10 +129,11 @@ class HasBallAtKickMonitor extends com.runtimeverification.rvmonitor.java.rt.tab
 	final boolean Prop_1_event_kicking(MotionControl MC) {
 		{
 			System.out.println("Kick Ball EVENT");
+			currMC = MC;
 		}
 
 		int nextstate = this.handleEvent(0, Prop_1_transition_kicking) ;
-		this.Prop_1_Category_violation = nextstate == 1;
+		this.Prop_1_Category_violation = nextstate == 2;
 
 		return true;
 	}
@@ -146,14 +149,24 @@ class HasBallAtKickMonitor extends com.runtimeverification.rvmonitor.java.rt.tab
 		}
 
 		int nextstate = this.handleEvent(1, Prop_1_transition_ballkickable) ;
-		this.Prop_1_Category_violation = nextstate == 1;
+		this.Prop_1_Category_violation = nextstate == 2;
 
 		return true;
 	}
 
 	final void Prop_1_handler_violation (){
 		{
-			System.out.println("!!!BallKickable LTL FAIL!!!");
+			sonarVal = currMC.mainSC.fetchSonarVal();
+			if (currMC.mainSC.BallInFront() && currMC.mainSC.BallKickable()) {
+				System.out.println("!!!BallKickable LTL FAIL -- But Ball Close!!!");
+				System.out.println("!!!Still Kick-Ready!!!");
+			} else {
+				System.out.println("!!!BallKickable LTL FAIL -- But Ball  NOT Close!!!");
+				System.out.println("!!!Turning to ball -- Recovery!!!");
+				while (!currMC.FindAndGrabBall()) {
+					System.out.println("!!!Turning to ball -- Recovery Try!!!");
+				}
+			}
 		}
 
 	}
@@ -183,7 +196,13 @@ class HasBallAtKickMonitor extends com.runtimeverification.rvmonitor.java.rt.tab
 			return;
 			case 0:
 			//kicking
-			return;
+			//alive_MC
+			if(!(alive_parameters_0)){
+				RVM_terminated = true;
+				return;
+			}
+			break;
+
 			case 1:
 			//ballkickable
 			//alive_MC
@@ -202,7 +221,7 @@ class HasBallAtKickMonitor extends com.runtimeverification.rvmonitor.java.rt.tab
 	}
 
 	public static int getNumberOfStates() {
-		return 3;
+		return 4;
 	}
 
 }
