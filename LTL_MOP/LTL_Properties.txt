@@ -1,0 +1,16 @@
+// 1. Ball remains in front of the robot during goto ball
+	-- Finished, tested
+// 2. Ball remains in front of the robot when going to the goal
+	-- Created, testing
+// 3. Robot turns to the goal  when GOTO ball/Wonder success
+	-- Finished, tested
+// 4. Dribble action occurs when the robot is headed to the goal and the ball is close enough for the dribble
+// 5. IR always reads a value.
+	//N/A possible with interference or if the ball is directly behind it.
+// 6. Robot turns in the correct direction of the read ball angle
+// 7. Robot stops at the ball when it is close enough.
+	-- Created, testing
+// 8. Robot has the ball at the kick
+	-- Finished, tested
+// 9. Robot goes to the goal until within range of the goal
+	-- Created, testing
