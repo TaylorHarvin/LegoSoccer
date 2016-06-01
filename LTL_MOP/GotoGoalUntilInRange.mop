@@ -1,0 +1,62 @@
+// LTL 9
+// Robot goes to the goal until within range of the goal
+
+package mop;
+
+import java.io.*;
+import java.util.*;
+import fullSoccer.*;
+import lejos.robotics.navigation.Waypoint;
+
+GotoGoalUntilInRange(MotionControl MC) {
+	boolean isGotoGoal = false;
+	boolean goalRangeFlag = true;
+	MotionControl currMC;
+	boolean ballInFrontFlag = false;
+	
+	event gotogoal after(Waypoint dest, boolean withBall,MotionControl MC) returning (boolean gotoRes) :
+		call(public boolean GotoWaypoint(Waypoint,boolean)) && condition(gotoRes) && args(dest, withBall)&& target(MC){
+			System.out.println("Goto Goal Event");
+			currMC = MC;
+			isGotoGoal = withBall;
+			if(isGotoGoal){
+				goalRangeFlag = MC.InGoalRange();
+				
+			}
+			//MC.GotoWaypoint(new Waypoint(1,1),false);
+		}
+		
+
+		
+	event ingoalrange after(MotionControl MC) returning (boolean res):
+		call(public boolean InGoalRange()) && condition(res) && this(MC){
+			currMC = MC;
+			System.out.println("Ball in front true");
+		}
+	
+	
+	event ballinfront after(MotionControl MC) returning (boolean ballinfrontRes):
+		call(public boolean BallInFront()) && condition(ballinfrontRes) && this(MC){
+			currMC = MC;
+			System.out.println("Ball in front: "+ballinfrontRes);
+			ballInFrontFlag = ballinfrontRes;
+		}
+	
+	
+	// When going to goal starts, keep going until 
+	// it is in range of the goal or it looses the ball
+	ltl: [](gotogoal U (ingoalrange or not ballinfront))
+	@violation {
+		if(isGotoGoal){
+			System.out.println("!!!GotoGoalUntilInRange FAIL!!!");
+			if(!ballInFrontFlag){
+				System.out.println("!!!ATTEMPTING FIND BALL!!!");
+				currMC.FindAndGrabBall();
+			}
+			System.out.println("!!!GOING TO CORRECT GOAL!!!");
+			currMC.GotoWaypoint(new Waypoint(SoccerGlobals.GOAL_LOCATION.getX(),SoccerGlobals.GOAL_LOCATION.getY()), isGotoGoal);
+		}
+	}
+
+}
+

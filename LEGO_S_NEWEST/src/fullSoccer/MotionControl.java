@@ -24,9 +24,16 @@ public class MotionControl {
 	public Navigator roboMotor;				// Grid navigation handler
 	private UnregulatedMotor arm;			// robot kicking arm
 	PoseProvider posProv;					// provides the robot's position in waypoint terms
-	SensorControl mainSC;					// handles all sensor value pulls
+	public SensorControl mainSC;					// handles all sensor value pulls
 	MoveController baseMC;					// direct motor control -- NOTE: MAY BE REMOVED
 	private CompassPoseProvider compassProv;
+	
+	// LTL VIOLATION FLAGS
+	boolean TRIGGER_KICKABLE_LTL_VIOLATION = false;
+	boolean TRIGGER_PRE_GOAL_RANGE_LTL_VIOLATION = false;
+	boolean TRIGGER_BALL_CLOSE_AT_GOTO_LTL_VIOLATION = false;
+	boolean TRIGGER_STOP_AT_BALL_LTL_VIOLATION = true;
+	
 	
 	public MotionControl(RegulatedMotor leftMotor, RegulatedMotor rightMotor, SensorControl sc, boolean simEnabled){
 		// !!!NOTE: DIMS MAY BE WRONG FOR WHEEL!!!
@@ -97,7 +104,7 @@ public class MotionControl {
 				
 				// Only dribble the ball if the robot is moving forward
 				// and the ball is close enough to dribble the ball
-				if((Math.abs(Math.abs(prevHeading)-Math.abs(currHeading)) < 0.05) && mainSC.BallKickable()){
+				if((Math.abs(Math.abs(prevHeading)-Math.abs(currHeading)) < 0.05) && (TRIGGER_KICKABLE_LTL_VIOLATION || mainSC.BallKickable())){
 					// Setup dribble speeds
 					if(!dribbleReady){
 						System.out.println("Dribble Ready");
@@ -110,38 +117,9 @@ public class MotionControl {
 				}
 				
 				prevHeading = currHeading;
-				distToGoalPoint = (float) Math.sqrt(
-						Math.pow(destination.getX() - this.GetRobotX(), 2) +
-			            Math.pow(destination.getY() - this.GetRobotY(), 2) );
+				if(InGoalRange() || TRIGGER_PRE_GOAL_RANGE_LTL_VIOLATION)
+					return true;
 				
-				System.out.println("Goal Range: "+ distToGoalPoint);
-				
-				// Setup a goal kick if the robot is close enough to the goal
-				// and the robot still has the ball
-				if(distToGoalPoint <= SoccerGlobals.GOAL_RANGE_THRESHOLD && mainSC.BallInFront()){
-					boolean goalHitStatus = false;
-					System.out.println("In Goal Range");
-					
-					
-					
-					// Kick the ball to the goal if the robot has the ball 
-					if(mainSC.BallKickable()){
-						KickBall(35,100,40,1000,200,700);
-						goalHitStatus = true;
-						System.out.println("Kicking at Goal");
-					}
-					else{
-						System.out.println("Ball out of robot range");
-						goalHitStatus = false;
-					}
-					
-					// Stop the robot and reset speed
-					
-					movePilot.setLinearSpeed(40);
-					movePilot.setAngularSpeed(40);
-					arm.setPower(40);
-					return goalHitStatus;
-				}
 			}
 		}
 		else
@@ -259,7 +237,19 @@ public class MotionControl {
 			StopMotion();
 			if(mainSC.BallClose()){
 				System.out.println("Stop Goto -- Ball Close");
-				return true;
+				// Only for Ball remains in front after goto ball violation testing
+				if(TRIGGER_BALL_CLOSE_AT_GOTO_LTL_VIOLATION){
+					System.out.println("Attempt LTL Violation NOW");
+					Delay.msDelay(3000);
+					System.out.println("Returning Goto");
+				}
+				
+				// Ball close -- but this can ignore that for violation testing
+				// true => normal behavior
+				if(!TRIGGER_STOP_AT_BALL_LTL_VIOLATION)
+					return true;
+				else
+					return false;
 			}
 			else{
 				System.out.println("Stop Goto -- Ball Not Close");
@@ -313,6 +303,57 @@ public class MotionControl {
 		movePilot.setLinearSpeed(oldRobotSpeed);
 		movePilot.setAngularSpeed(oldRobotSpeed);
 	}
+	
+	
+	public boolean InGoalRange(){
+		float distToGoalPoint = (float) Math.sqrt(
+				Math.pow(SoccerGlobals.GOAL_LOCATION.getX() - this.GetRobotX(), 2) +
+	            Math.pow(SoccerGlobals.GOAL_LOCATION.getY() - this.GetRobotY(), 2) );
+		
+		System.out.println("Goal Range: "+ distToGoalPoint);
+		if(distToGoalPoint <= SoccerGlobals.GOAL_RANGE_THRESHOLD && mainSC.BallInFront()){
+			return true;
+		}
+		else
+			return false;
+	}
+	
+	
+	public boolean KickAtGoal(){
+		// Setup a goal kick if the robot is close enough to the goal
+		// and the robot still has the ball
+		if(InGoalRange()){
+			boolean goalHitStatus = false;
+			System.out.println("In Goal Range");
+			
+			
+			
+			// Kick the ball to the goal if the robot has the ball 
+			if(TRIGGER_KICKABLE_LTL_VIOLATION || mainSC.BallKickable()){
+				if(TRIGGER_KICKABLE_LTL_VIOLATION){
+					System.out.println("Attempt Kickable LTL VIOLATION -- NOW");
+					Delay.msDelay(3000);
+				}
+				KickBall(35,100,40,1000,200,700);
+				goalHitStatus = true;
+				System.out.println("Kicking at Goal");
+			}
+			else{
+				System.out.println("Ball out of robot range");
+				goalHitStatus = false;
+			}
+			
+			// Stop the robot and reset speed
+			
+			movePilot.setLinearSpeed(40);
+			movePilot.setAngularSpeed(40);
+			arm.setPower(40);
+			return goalHitStatus;
+		}
+		else
+			return false;
+	}
+	
 	
 }
 

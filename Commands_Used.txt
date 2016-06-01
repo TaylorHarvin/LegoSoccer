@@ -1,0 +1,10 @@
+***OLD*** ajc -1.6 -d ./ -inpath PlayerTypeInitializer.jar mop/Moving2MonitorAspect.aj -outjar test.jar
+
+javamop -d mop HasNext.mop
+
+ajc -1.6 mop/Moving2MonitorAspect.aj -d ./ -inpath "./PlayerTypeInitiallizer.jar;aspectjrt.jar;rv-monitor-rt.jar"  -outjar test.jar
+
+
+
+
+ajc -1.6 mop/BallInFrontAtGotoBallMonitorAspect.aj -d ./ -inpath "./PlayerInit.jar;aspectjrt.jar;rv-monitor-rt.jar"  -outjar test.jar

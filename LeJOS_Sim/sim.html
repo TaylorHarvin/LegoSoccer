@@ -1,0 +1,67 @@
+<html>
+	<head>
+		<script>
+			var ballPos = [100,100];
+			var btnDown = false;
+			
+			function MoveBall(xChange, yChange){
+				btnDown = true;
+				FinalizeBallMove(xChange, yChange);
+			}
+			
+			function FinalizeBallMove(xChange, yChange){
+				ballPos[0] += xChange;
+				ballPos[1] += yChange;
+				document.getElementById('ballXPos').innerHTML = ballPos[0]/10;
+				document.getElementById('ballYPos').innerHTML = ballPos[1]/10;
+				
+				if(btnDown)
+					setTimeout("FinalizeBallMove("+xChange+","+ yChange+")",1);
+			}
+			
+			function EndBallMove(){
+				btnDown = false;
+				
+			}
+			
+			function DrawAnim(){
+				//console.log(ballPos[0]);
+				var ctx = document.getElementById('simCanvas').getContext('2d');
+				ctx.clearRect(0,0,1000,500);
+				ctx.beginPath();
+				ctx.arc(ballPos[0],ballPos[1],10,0,2*Math.PI);
+				ctx.fillStyle = 'red';
+				ctx.fill();
+				ctx.stroke();
+				window.requestAnimationFrame(DrawAnim);
+			}
+			
+			
+			
+
+			function InitAnim(){
+				window.requestAnimationFrame(DrawAnim);
+			}
+			
+			
+			
+		
+			
+			
+		</script>
+	</head>
+	<body onload="InitAnim()">
+		<div style="border:2px solid black">
+			<canvas id="simCanvas" width="1000" height="500"></canvas>
+		</div>
+		<div>
+			Ball Controls
+			<button onmousedown="MoveBall(-1,0)" onmouseup="EndBallMove()">Left</button>
+			<button onmousedown="MoveBall(1,0)" onmouseup="EndBallMove()">Right</button>
+			<button onmousedown="MoveBall(0,-1)" onmouseup="EndBallMove()">Up</button>
+			<button onmousedown="MoveBall(0,1)" onmouseup="EndBallMove()">Down</button>
+			IR Ball X: <span id="ballXPos">100</span>
+			, y: <span id="ballYPos">100</span>
+		</div>
+	</body>
+</html>

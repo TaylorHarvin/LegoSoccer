@@ -1,28 +1,35 @@
-// From LTL 2 -- intended to be used with after advice
-// 2. Ball remains in front of the robot when going to the goal
+// LTL 2
+//  Ball remains in front of the robot when going to the goal
 
-// NOTE:  LOGIC WORKS, BUT MAY NEED ALTERATIONS FOR JAVAMOP COMPILER
+
 package mop;
 
 import java.io.*;
 import java.util.*;
 import fullSoccer.*;
 
-BallInFrontAtGotoGoal(Kicker MK, MotionControl MC) {
-	
+BallInFrontAtGotoGoal(Kicker MK) {
+	boolean ballInF = false;
 	
 	event gotogoal before(Kicker MK):
 		call(private boolean GotoGoal(boolean))&& target(MK){
+			System.out.println("Goto Goal Event");
+			ballInF = BallInFront();
+		}
+		
+	event ballinfront after(MotionControl MC) returning (boolean res):
+		call(public boolean MotionControl.BallInFront()) && condition(res) && this(MC){
 			System.out.println("Ball in front true");
 		}
 		
-	event ballinfront after(Kicker MK) returning (boolean res):
+	/*event ingoalrange after(MotionControl MC) returning (boolean res):
 		call(public boolean BallInFront()) && condition(res) && this(MK){
 			System.out.println("Ball in front true");
-		}
-		
-
-	ltl: [](gotogoal => [] (ballinfront))
+		}*/	
+	
+	// When going to goal starts, keep going until 
+	// it is in range of the goal or 
+	ltl: [](gotogoal U ((not ballinfront) /*or ingoalrange*/))
 	@violation { 
 		System.out.println("!!!BallInFrontAtGotoGoal FAIL!!!");
 	}
