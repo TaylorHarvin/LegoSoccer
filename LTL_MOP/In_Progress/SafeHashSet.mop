@@ -1,0 +1,22 @@
+SafeHashSet(HashSet t, Object o) {
+  int hashcode;
+ 
+  event add after(HashSet t, Object o) : 
+    call(* Collection+.add(Object)) && target(t) && args(o) {
+      hashcode = o.hashCode();
+    }
+  event bad_use before(HashSet t, Object o) : 
+    call(* Collection+.contains(Object)) && target(t) && args(o) 
+    && condition(hashcode != o.hashCode()) {
+    }
+  event remove after(HashSet t, Object o) : 
+    call(* Collection+.remove(Object)) && target(t) && args(o){
+    }
+ 
+  ltl : add => (not bad_use U remove)
+ 
+  @violation{
+    System.err.println("HashCode changed for Object " + o + " while being in a Hashtable!"); 
+    System.exit(1);
+  }
+}
