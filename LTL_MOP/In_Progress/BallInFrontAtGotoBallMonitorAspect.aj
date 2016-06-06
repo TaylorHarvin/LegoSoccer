@@ -130,7 +130,6 @@ class BallInFrontAtGotoBallMonitor extends com.runtimeverification.rvmonitor.jav
 			{
 				currMC = MC;
 				System.out.println("Goto Ball EVENT: " + gotoRes);
-				System.out.println("Ball in front:" + MC.mainSC.BallInFront());
 			}
 		}
 
