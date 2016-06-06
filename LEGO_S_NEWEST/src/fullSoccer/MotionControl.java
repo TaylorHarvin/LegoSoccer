@@ -30,9 +30,9 @@ public class MotionControl {
 	
 	// LTL VIOLATION FLAGS
 	boolean TRIGGER_KICKABLE_LTL_VIOLATION = false;
-	boolean TRIGGER_PRE_GOAL_RANGE_LTL_VIOLATION = false;
+	boolean TRIGGER_PRE_GOAL_RANGE_LTL_VIOLATION = true;
 	boolean TRIGGER_BALL_CLOSE_AT_GOTO_LTL_VIOLATION = false;
-	boolean TRIGGER_STOP_AT_BALL_LTL_VIOLATION = true;
+	boolean TRIGGER_STOP_AT_BALL_LTL_VIOLATION = false;
 	
 	
 	public MotionControl(RegulatedMotor leftMotor, RegulatedMotor rightMotor, SensorControl sc, boolean simEnabled){
@@ -121,6 +121,7 @@ public class MotionControl {
 					return true;
 				
 			}
+			roboMotor.stop();
 		}
 		else
 			return true;
@@ -270,13 +271,16 @@ public class MotionControl {
 			if(ballInFront){
 				System.out.println("ball in front -- GOTO");
 				ballGrabbable = GotoBall();
+				ballInFront = mainSC.BallInFront();
+				System.out.println("BIF: "+ ballInFront);
 				gotoTry++;
 			}
 			
-			// The ball moved after
-			if(!ballGrabbable){
+			// Check if the ball essentially moved
+			if(!ballInFront || !ballGrabbable || !mainSC.BallClose()){
 				System.out.println("Ball not in front -- after GOTO");
 				ballInFront = this.TurnToBall();
+				ballGrabbable = false;
 			}
 		}
 		

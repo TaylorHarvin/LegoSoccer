@@ -39,6 +39,14 @@ public class Kicker {
 		return mainMC.GotoWaypoint(new Waypoint(SoccerGlobals.GOAL_LOCATION.getX(),SoccerGlobals.GOAL_LOCATION.getY()), withBall);
 		
 	}
+	public MotionControl GetMotionControl(){
+		return mainMC;
+	}
+	
+	public void InitIR(){
+		mainSC.getAllIrSig();
+	}
+	
 	
 	public void Play(){
 		boolean ballKickedToGoal = false;
@@ -50,7 +58,7 @@ public class Kicker {
 				System.out.println("Wonder Worked");
 				if(!triggerLTLViolation){
 					// If the robot is in the goal range with the ball -- kick the ball to the goal
-					if(GotoGoal(true))
+					if(GotoGoal(true) && mainMC.InGoalRange())
 						ballKickedToGoal = mainMC.KickAtGoal();
 				}
 				else

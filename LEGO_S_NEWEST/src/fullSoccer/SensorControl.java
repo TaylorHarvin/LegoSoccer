@@ -25,6 +25,10 @@ public class SensorControl {
 	public final float BALL_SONAR_DIST_GRAB = (float) 0.08;	// Sonar value threshold for grabbing the ball
 	public HiTechnicCompass compassSensor;
 	public SampleProvider compassSP;
+	private float ballDirMod /*= fetchAngleVal(true)*/;
+	private float ballDirUnMod /*= fetchAngleVal(false)*/;
+	
+	
 	
 	
 	private FileReader simFileReader;
@@ -80,18 +84,27 @@ public class SensorControl {
 		return irSample[0];
 	}
 	
+	
+	public float GetLastModIR(){
+		return ballDirMod;
+	}
+	
+	public float GetLastUnModIR(){
+		return ballDirUnMod;
+	}
+	
 	public float GetBallDirection(){
 		float avgDir = 0;
 		int used = 0;
-		float[] irVals = new float[2];
+		//float[] irVals = new float[2];
 		fetchSonarVal();
-		irVals = getAllIrSig();
-		if(!Float.isNaN(irVals[0])){
-			avgDir += irVals[0];
+		//irVals = getAllIrSig();
+		if(!Float.isNaN(ballDirMod)){
+			avgDir += ballDirMod;
 			used++;
 		}
-		if(!Float.isNaN(irVals[1])){
-			avgDir += irVals[1];
+		if(!Float.isNaN(ballDirUnMod)){
+			avgDir += ballDirUnMod;
 			used++;
 		}
 		if(used > 0){
@@ -123,13 +136,19 @@ public class SensorControl {
 			return 9999;
 	}
 	
-	public float[] getAllIrSig(){
-		float[] vals = new float[2];
-		float ballDirMod = fetchAngleVal(true);
-		float ballDirUnMod = fetchAngleVal(false);
-		vals[0] = ballDirMod;
-		vals[1] = ballDirUnMod;
-		return vals;
+	public /*float[]*/boolean getAllIrSig(){
+		//float[] vals = new float[2];
+		ballDirMod = fetchAngleVal(true);
+		ballDirUnMod = fetchAngleVal(false);
+		//vals[0] = ballDirMod;
+		//vals[1] = ballDirUnMod;
+		//return vals;
+		// Verify that an IR signal is read -- this should be at all times
+		if(!Float.isNaN(ballDirMod) || !Float.isNaN(ballDirUnMod))
+			return true;
+		else
+			return false;
+		
 	}
 	
 	
@@ -164,9 +183,9 @@ public class SensorControl {
 		boolean unModInFront = false;
 		boolean unModInRange = false;
 		boolean modInRange = false;
-		float[] vals = getAllIrSig();
-		float ballDirMod = vals[0];
-		float ballDirUnMod = vals[1];
+		getAllIrSig();
+		/*float ballDirMod = vals[0];
+		float ballDirUnMod = vals[1];*/
 
 		
 		if(!Float.isNaN((ballDirMod))){
