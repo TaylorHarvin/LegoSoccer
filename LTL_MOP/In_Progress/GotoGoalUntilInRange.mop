@@ -7,31 +7,58 @@ import java.io.*;
 import java.util.*;
 import fullSoccer.*;
 import lejos.robotics.navigation.Waypoint;
+import lejos.utility.Delay;
 
-GotoGoalUntilInRange(MotionControl MC) {
+GotoGoalUntilInRange(Kicker MK,MotionControl MC) {
 	boolean isGotoGoal = false;
 	boolean goalRangeFlag = true;
 	MotionControl currMC;
 	boolean ballInFrontFlag = false;
 	
-	event gotogoal after(Waypoint dest, boolean withBall,MotionControl MC) returning (boolean gotoRes) :
+	/*event gotogoal after(Waypoint dest, boolean withBall,MotionControl MC) returning (boolean gotoRes) :
 		call(public boolean GotoWaypoint(Waypoint,boolean)) && condition(gotoRes) && args(dest, withBall)&& target(MC){
 			System.out.println("Goto Goal Event");
 			currMC = MC;
 			isGotoGoal = withBall;
-			if(isGotoGoal){
-				goalRangeFlag = MC.InGoalRange();
-				
-			}
 			//MC.GotoWaypoint(new Waypoint(1,1),false);
-		}
-		
+		}*/
+	/*event gotogoal after(boolean withBall,Kicker MK) returning (boolean gotoRes) :
+		call(public boolean GotoGoal(boolean)) && condition(gotoRes) && args(withBall)&& target(MK){
+			System.out.println("Goto Goal Event");
+			currMC = MC;
+			isGotoGoal = withBall;
+			//MC.GotoWaypoint(new Waypoint(1,1),false);
+		}*/	
 
+	event gotogoal before(boolean withBall,Kicker MK):
+		call(public boolean GotoGoal(boolean)) && args(withBall)&& target(MK){
+			System.out.println("Goto Goal Event");
+			currMC = MK.GetMotionControl();
+			isGotoGoal = withBall;
+			//MC.GotoWaypoint(new Waypoint(1,1),false);
+		}	
+		
+	event generalGoto after(Waypoint dest):
+		call(public void goTo(Waypoint)) && args(dest){
+			if(dest.x == SoccerGlobals.GOAL_LOCATION.x && dest.y == SoccerGlobals.GOAL_LOCATION.y){
+				isGotoGoal = true;
+			}
+			else{
+				isGotoGoal = false;
+			}
+		}	
+	
 		
 	event ingoalrange after(MotionControl MC) returning (boolean res):
 		call(public boolean InGoalRange()) && condition(res) && this(MC){
 			currMC = MC;
-			System.out.println("Ball in front true");
+			System.out.println("Goal Range Check: "+res);
+		}
+		
+	event robotmoving after(MotionControl MC) returning (boolean res):
+		call(public boolean RobotMoving()) && condition(res) && this(MC){
+			currMC = MC;
+			System.out.println("Movement Check: "+res);
 		}
 	
 	
@@ -45,17 +72,24 @@ GotoGoalUntilInRange(MotionControl MC) {
 	
 	// When going to goal starts, keep going until 
 	// it is in range of the goal or it looses the ball
-	ltl: [](gotogoal U (ingoalrange or not ballinfront))
+	//ltl: []((gotogoal) => (robotmoving U ingoalrange))
+	ltl: [](generalGoto => (robotmoving U ingoalrange))
+	
+	///ltl: []((gotogoal) => (<> robotmoving and (robotmoving U (not ballinfront or ingoalrange))))
+	//ltl: [](ballinfront)
+	//ltl: [](gotogoal U (ingoalrange /*or not ballinfront*/))
 	@violation {
 		if(isGotoGoal){
 			System.out.println("!!!GotoGoalUntilInRange FAIL!!!");
-			if(!ballInFrontFlag){
+			Delay.msDelay(10000);
+			/*if(!ballInFrontFlag){
 				System.out.println("!!!ATTEMPTING FIND BALL!!!");
 				currMC.FindAndGrabBall();
-			}
-			System.out.println("!!!GOING TO CORRECT GOAL!!!");
-			currMC.GotoWaypoint(new Waypoint(SoccerGlobals.GOAL_LOCATION.getX(),SoccerGlobals.GOAL_LOCATION.getY()), isGotoGoal);
+			}*/
+			//System.out.println("!!!GOING TO CORRECT GOAL!!!");
+			//currMC.GotoWaypoint(new Waypoint(SoccerGlobals.GOAL_LOCATION.getX(),SoccerGlobals.GOAL_LOCATION.getY()), isGotoGoal);*/
 		}
+		__RESET;
 	}
 
 }

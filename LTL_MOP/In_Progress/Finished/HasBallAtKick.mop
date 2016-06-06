@@ -1,0 +1,52 @@
+// From LTL 8
+// Robot has the ball at the kick
+
+package mop;
+
+import java.io.*;
+import java.util.*;
+import fullSoccer.*;
+
+HasBallAtKick(MotionControl MC) {
+	float sonarVal = 9999;
+	boolean ballClose = false;
+	MotionControl currMC = null;
+	
+	
+	event kicking before(MotionControl MC):
+		call(public void KickBall(int,int, int,int, int, int)) && target(MC){
+			System.out.println("Kick Ball EVENT");
+			currMC = MC;
+			/*if(sonarVal < 0.08)
+				return true;*/
+		}
+	
+		
+	event ballkickable after(MotionControl MC) returning (boolean res):
+		call(public boolean BallKickable()) && condition(res) && this(MC){
+			System.out.println("Ball Kickable: "+ res);
+			
+		}
+
+	ltl: [](kicking => (*) ballkickable)
+	//ltl: [](kicking => ballClose)
+	@violation {
+		sonarVal = currMC.mainSC.fetchSonarVal();
+		
+		// Check the actual position of the ball with sonar and ball in front
+		if(currMC.mainSC.BallInFront() && currMC.mainSC.BallKickable()){
+			System.out.println("!!!BallKickable LTL FAIL -- But Ball Close!!!");
+			System.out.println("!!!Still Kick-Ready!!!");	
+		}
+		else{
+			System.out.println("!!!BallKickable LTL FAIL -- But Ball  NOT Close!!!");
+			System.out.println("!!!Turning to ball -- Recovery!!!");
+			while(!currMC.FindAndGrabBall()){
+				System.out.println("!!!Turning to ball -- Recovery Try!!!");
+			}
+		}
+		//MC.FindAndGrabBall();
+	}
+
+}
+
