@@ -16,8 +16,6 @@ public class PlayerInit {
 		System.out.println("Battery Voltage: " + Battery.getVoltage());
 		System.out.println("Choose Player");
 		//int robotChoice = Button.waitForAnyPress();
-		MotionControl mainMC;
-		SensorControl mainSC;
 		float ballLoc;
 		
 		//switch(robotChoice){

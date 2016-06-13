@@ -24,17 +24,21 @@ public class MotionControl {
 	public Navigator roboMotor;				// Grid navigation handler
 	private UnregulatedMotor arm;			// robot kicking arm
 	PoseProvider posProv;					// provides the robot's position in waypoint terms
-	public SensorControl mainSC;					// handles all sensor value pulls
+	public SensorControl mainSC;			// handles all sensor value pulls
 	MoveController baseMC;					// direct motor control -- NOTE: MAY BE REMOVED
-	private CompassPoseProvider compassProv;
-	
-	// LTL VIOLATION FLAGS
-	boolean TRIGGER_KICKABLE_LTL_VIOLATION = false;
-	boolean TRIGGER_PRE_GOAL_RANGE_LTL_VIOLATION = true;
-	boolean TRIGGER_BALL_CLOSE_AT_GOTO_LTL_VIOLATION = false;
-	boolean TRIGGER_STOP_AT_BALL_LTL_VIOLATION = false;
+	private CompassPoseProvider compassProv;// compass
 	
 	
+	
+	/*  Constructor for the motion controller
+	 *	Preconditions: 
+	 *		1. left and right motors are initialized
+	 *		2. sensor controller is initialized
+	 *	Postconditions:
+	 *		1. Returns true
+	 *			1. Navigator initialized with the correct dimentions
+	 *			2. Position provider initialized
+	 */
 	public MotionControl(RegulatedMotor leftMotor, RegulatedMotor rightMotor, SensorControl sc, boolean simEnabled){
 		// !!!NOTE: DIMS MAY BE WRONG FOR WHEEL!!!
 		//float wheelDiam = 3.348;
@@ -48,7 +52,7 @@ public class MotionControl {
 			movePilot = new MovePilot(chassis);
 			roboMotor = new Navigator(movePilot);
 			mainSC = sc;
-			DirectionFinderAdapter df = new DirectionFinderAdapter(mainSC.compassSP);
+			//DirectionFinderAdapter df = new DirectionFinderAdapter(mainSC.compassSP);
 			
 			//compassProv = new CompassPoseProvider(movePilot,df);
 			//roboMotor.setPoseProvider(compassProv);
@@ -66,7 +70,13 @@ public class MotionControl {
 		}
 	}
 	
-	// Dribble ball -- slight tap moving forward assumed
+	/*  Dribble ball -- slight tap moving forward assumed
+	 *	Preconditions: 
+	 *		1. Robot is moving forward
+	 *		2. Ball is close enough to the robot for a dribble
+	 *	Postconditions:
+	 *		1. Taps the ball
+	 */
 	public void DribbleBall(){
 		System.out.println("Dribble Ball");
 		arm.backward();
@@ -75,10 +85,36 @@ public class MotionControl {
 		Delay.msDelay(200);
 	}
 	
+	
+	
+	/*  Tells if the main motors are moving
+	 *	Preconditions: 
+	 *		1. roboMotor is initialized
+	 *		2. Motors are functioning
+	 *	Postconditions:
+	 *		1. Returns true
+	 *			1.1. The robot is moving
+	 *		2. Returns false
+	 *			2.1. The robot is not moving
+	 */
 	public boolean RobotMoving(){
 		return roboMotor.isMoving();
 	}
 	
+	
+	/*  The robot moves to a given point (if to the goal -- then it dribbles the ball)
+	 *	Preconditions: 
+	 *		1. If withBall => Ball is in front of the robot
+	 *		2. Destination within the field area
+	 *		3. All sensors and motors are properly functioning
+	 *	Postconditions:
+	 *		1. Returns true
+	 *			1.1. The robot has the ball in it's arms
+	 *		2. Returns false
+	 *			2.1. The ball was moved.
+	 *			2.2. OR The ball angle read was originally incorrect
+	 *			2.3. OR The robot hit (NOT KICK) the ball enough to make it loose the ball
+	 */
 	public boolean GotoWaypoint(Waypoint destination, boolean withBall){
 		roboMotor.clearPath();			// Ensure that no other waypoints exist
 		//roboMotor.addWaypoint(destination);
@@ -104,7 +140,7 @@ public class MotionControl {
 				
 				// Only dribble the ball if the robot is moving forward
 				// and the ball is close enough to dribble the ball
-				if((Math.abs(Math.abs(prevHeading)-Math.abs(currHeading)) < 0.05) && (TRIGGER_KICKABLE_LTL_VIOLATION || mainSC.BallKickable())){
+				if((Math.abs(Math.abs(prevHeading)-Math.abs(currHeading)) < 0.05) && (mainSC.BallKickable())){
 					// Setup dribble speeds
 					if(!dribbleReady){
 						System.out.println("Dribble Ready");
@@ -117,7 +153,7 @@ public class MotionControl {
 				}
 				
 				prevHeading = currHeading;
-				if(InGoalRange() || TRIGGER_PRE_GOAL_RANGE_LTL_VIOLATION)
+				if(InGoalRange())
 					return true;
 				
 			}
@@ -130,29 +166,58 @@ public class MotionControl {
 		return false;
 	}
 	
-	// Returns the current heading of the robot
-	// Note -- it is sometimes invalid
+	/* Returns the current heading of the robot
+	 * Note -- it is sometimes invalid
+	 *	Preconditions: 
+	 *		1. Position provider (posProv) initialized
+	 *		2. All prior positions reported have been valid
+	 *	Postconditions:
+	 *		Returns
+	 *			1. The heading of the robot (in degrees)
+	 */
 	public float GetRobotHeading(){
 		return posProv.getPose().getHeading();
 	}
 	
-	// Returns the current x position of the robot
-	// Note -- it is sometimes invalid
+	
+	/* Returns the current x position of the robot
+	 * Note -- it is sometimes invalid
+	 *	Preconditions: 
+	 *		1. Position provider (posProv) initialized
+	 *		2. All prior positions reported have been valid
+	 *	Postconditions:
+	 *		Returns
+	 *			1. The X position of the robot on the grid
+	 */
 	public float GetRobotX(){
 		return posProv.getPose().getX();
 	}
 	
 	
-	// Returns the current y position of the robot
-	// Note -- it is sometimes invalid
+	/* Returns the current y position of the robot
+	 * Note -- it is sometimes invalid
+	 *	Preconditions: 
+	 *		1. Position provider (posProv) initialized
+	 *		2. All prior positions reported have been valid
+	 *	Postconditions:
+	 *		Returns
+	 *			1. The Y position of the robot on the grid
+	 */
 	public float GetRobotY(){
 		return posProv.getPose().getY();
 	}
 	
 	
-	// Basic forward motion of the robot at the given speed
-	// NOTE: this overrides the Navigator API
-	//		 it is possible that this causes issues with positioning
+	
+	/* Basic forward motion of the robot at the given speed
+	 * NOTE: this overrides the Navigator API
+	 *		 it is possible that this causes issues with positioning
+	 *	Preconditions: 
+	 *		1. Given speed is valid
+	 *	Postconditions:
+	 *		1. Main motors are set at the same speed
+	 *		2. Main motors are moving in the forward direction
+	 */
 	public void StartMotionForward(int speed){
 		//movePilot.setLinearAcceleration(speed);
 		movePilot.setLinearSpeed(speed);
@@ -160,9 +225,14 @@ public class MotionControl {
 	}
 	
 	
-	// Halt all motor motion
-	// NOTE: this overrides the Navigator API
-	//		 it is possible that this causes issues with positioning
+	/* Halt all motor motion
+	 * NOTE: this overrides the Navigator API
+	 *		 it is possible that this causes issues with positioning
+	 *	Preconditions: 
+	 *		1. Main motors moving
+	 *	Postconditions:
+	 *		1. Main motors stop
+	 */
 	public void StopMotion(){
 		//baseMC.stop();
 		this.movePilot.stop();
@@ -170,17 +240,27 @@ public class MotionControl {
 	
 	
 	
-	// Turn the robot towards the ball
-	// NOTE: it will fail if the ball moves at all or the 
-	// original IR sensor value may be inaccurate
+	
+	/* Turn the robot towards the ball
+	 * NOTE: it will fail if the ball moves at all or the 
+	 * original IR sensor value may be inaccurate
+	 *	Preconditions: 
+	 *		1. IR is valid
+	 *		2. All motors are functioning properly
+	 *	Postconditions:
+	 *		1. Returns true
+	 *			1.1. The ball is in front of the robot
+	 *		2. Returns false
+	 *			2.1. The ball is not in front of the robot
+	 *				2.1.1. The ball was probably moved
+	 */
 	public boolean TurnToBall(){
-		float ballDir = mainSC.GetBallDirection();
-		float ballLoc = 0;
-		boolean ballIRInvalid = false;
-		boolean searchForIR = true;
+		float ballDir = mainSC.GetBallDirection();	// Current IR read
+		float ballLoc = 0;							// Current ball angle in relation to the robot heading
+		boolean ballIRInvalid = false;				// Recovery flag for an invalid current IR -- tell it to do 180 degree turn				
 		
 		if(ballDir != -1)
-			ballLoc = this.GetRobotHeading()+mainSC.GetBallDirection();
+			ballLoc = this.GetRobotHeading()+ballDir;
 		else{
 			ballLoc = this.GetRobotHeading()+ 180;
 			ballIRInvalid = true;
@@ -202,7 +282,9 @@ public class MotionControl {
 		
 		//this.GotoWaypoint(new Waypoint(this.GetRobotX(),this.GetRobotY(),ballLoc), false);
 		roboMotor.rotateTo(ballLoc);
-		while(!mainSC.BallInFront() && RobotMoving() && searchForIR){
+		
+		// Keep turning until the ball is in front of the robot or the robot hit it's original turn-to-point
+		while(!mainSC.BallInFront() && RobotMoving()){
 
 			if(ballIRInvalid){
 				// New ball direction found -- return for main to handle
@@ -221,7 +303,19 @@ public class MotionControl {
 	}
 	
 	
-	// Go to the ball -- only if it is in front of the robot
+
+	/*	Go to the ball -- only if it is in front of the robot
+	 *	Preconditions: 
+	 *		1. Ball is in front of the robot
+	 *		2. All sensors and motors are properly functioning
+	 *	Postconditions:
+	 *		1. Returns true
+	 *			1.1. The robot has the ball in it's arms
+	 *		2. Returns false
+	 *			2.1. The ball was moved.
+	 *			2.2. OR The ball angle read was originally incorrect
+	 *			2.3. OR The robot hit (NOT KICK) the ball enough to make it loose the ball
+	 */
 	public boolean GotoBall(){
 		//movePilot.setAngularSpeed(5);
 		movePilot.setLinearSpeed(5);
@@ -238,19 +332,7 @@ public class MotionControl {
 			StopMotion();
 			if(mainSC.BallClose()){
 				System.out.println("Stop Goto -- Ball Close");
-				// Only for Ball remains in front after goto ball violation testing
-				if(TRIGGER_BALL_CLOSE_AT_GOTO_LTL_VIOLATION){
-					System.out.println("Attempt LTL Violation NOW");
-					Delay.msDelay(3000);
-					System.out.println("Returning Goto");
-				}
-				
-				// Ball close -- but this can ignore that for violation testing
-				// true => normal behavior
-				if(!TRIGGER_STOP_AT_BALL_LTL_VIOLATION)
-					return true;
-				else
-					return false;
+				return true;
 			}
 			else{
 				System.out.println("Stop Goto -- Ball Not Close");
@@ -260,12 +342,25 @@ public class MotionControl {
 		
 	}
 	
-	// Handle turn to ball and goto ball
+	
+	/*	Handle turn to ball and goto ball
+	 *	Preconditions: 
+	 *		1. Ball is turned on
+	 *		2. All motors and sensors initiated and functioning
+	 *		3. Motors set to a reasonable speed
+	 *	Postconditions:
+	 *		1. Returns true
+	 *			1.1. The robot has the ball in it's arms
+	 *		2. Returns false
+	 *			2.1. The ball was never found by the robot.
+	 *			2.2. OR The robot's speed is too fast to successfully goto the ball
+	 */
 	public boolean FindAndGrabBall(){
-		boolean ballGrabbable = false;
-		boolean ballInFront = false;
-		int gotoTry = 0;
+		boolean ballGrabbable = false;	// Flag for the ball within the robot's arms
+		boolean ballInFront = false;	// Flag for ball in front of the robot
+		int gotoTry = 0;				// Count for ball grab attempts
 		
+		// Try to turn to the ball and goto it
 		while(!ballGrabbable && gotoTry < MAX_GOTO_TRY){
 			// If the ball is in front of the robot -- goto it
 			if(ballInFront){
@@ -288,7 +383,17 @@ public class MotionControl {
 	}
 	
 	
-	// Kick the ball and then return the speeds to original
+	/*	Kick the ball and then return the speeds to original
+	 *	Preconditions: 
+	 *		1. The ball is kickable
+	 *		2. All motors are connected and functioning
+	 *		3. Valid speeds given
+	 *		4. Valid power given
+	 *		5. Delay given does not exceed an unrealistic value
+	 *	Postconditions:
+	 *		1. The ball has been kicked
+	 *		2. Original motor speeds and power are reset back the original
+	 */
 	public void KickBall(int oldArmPower,int newArmPower, int oldRobotSpeed,int newRobotSpeed, int armDelay, int forwardDelay){
 		arm.setPower(newArmPower);
 		movePilot.setLinearSpeed(newRobotSpeed);
@@ -309,13 +414,25 @@ public class MotionControl {
 	}
 	
 	
+	
+	
+	/*	Check if the robot is close enough to the goal for a proper kick
+	 *	Preconditions: 
+	 *		1. The robot's position tracking up to this point has been accurate 
+	 *	Postconditions:
+	 *		1. Returns true
+	 *			1.1. The robot is within a specified goal range threshold
+	 *		2. Returns false
+	 *			2.1. The robot is within a specified goal range threshold
+	 *
+	 */
 	public boolean InGoalRange(){
 		float distToGoalPoint = (float) Math.sqrt(
 				Math.pow(SoccerGlobals.GOAL_LOCATION.getX() - this.GetRobotX(), 2) +
 	            Math.pow(SoccerGlobals.GOAL_LOCATION.getY() - this.GetRobotY(), 2) );
 		
 		System.out.println("Goal Range: "+ distToGoalPoint);
-		if(distToGoalPoint <= SoccerGlobals.GOAL_RANGE_THRESHOLD && mainSC.BallInFront()){
+		if(distToGoalPoint <= SoccerGlobals.GOAL_RANGE_THRESHOLD){
 			return true;
 		}
 		else
@@ -323,6 +440,23 @@ public class MotionControl {
 	}
 	
 	
+	
+	
+	
+	/*	Performs a full kick of the ball towards the goal
+	 *	Preconditions: 
+	 *		1. The robot is within range of the goal
+	 *		2. The ball is within kickable range from the robot
+	 *			2.1. The ball should be somewhere in the robot's arms
+	 *	Postconditions:
+	 *		1. Returns true
+	 *			1.1. Ball is kicked towards the goal.
+	 *			1.2. Ball is now rolling towards the goal
+	 *		2. Returns false
+	 *			2.1. The robot is not in the range of the goal
+	 *			2.2. OR The ball was not in kickable range from the robot
+	 *
+	 */
 	public boolean KickAtGoal(){
 		// Setup a goal kick if the robot is close enough to the goal
 		// and the robot still has the ball
@@ -330,14 +464,8 @@ public class MotionControl {
 			boolean goalHitStatus = false;
 			System.out.println("In Goal Range");
 			
-			
-			
 			// Kick the ball to the goal if the robot has the ball 
-			if(TRIGGER_KICKABLE_LTL_VIOLATION || mainSC.BallKickable()){
-				if(TRIGGER_KICKABLE_LTL_VIOLATION){
-					System.out.println("Attempt Kickable LTL VIOLATION -- NOW");
-					Delay.msDelay(3000);
-				}
+			if(mainSC.BallKickable()){
 				KickBall(35,100,40,1000,200,700);
 				goalHitStatus = true;
 				System.out.println("Kicking at Goal");
@@ -346,12 +474,6 @@ public class MotionControl {
 				System.out.println("Ball out of robot range");
 				goalHitStatus = false;
 			}
-			
-			// Stop the robot and reset speed
-			
-			movePilot.setLinearSpeed(40);
-			movePilot.setAngularSpeed(40);
-			arm.setPower(40);
 			return goalHitStatus;
 		}
 		else
