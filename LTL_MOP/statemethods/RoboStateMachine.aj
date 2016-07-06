@@ -1,58 +1,43 @@
 /* Developer: Taylor Harvin
- * Date: 6/27/2016
+ * Date Last Changed: 7/06/2016
  * Purpose: Provide state properties of the robot
  *
  */
 
 import fullSoccer.*;
 import lejos.robotics.navigation.Waypoint;
+import lejos.robotics.RegulatedMotor;
+import lejos.hardware.motor.UnregulatedMotor;
+import lejos.robotics.navigation.Navigator;
+import lejos.hardware.sensor.EV3UltrasonicSensor;
+import lejos.hardware.sensor.HiTechnicCompass;
+import lejos.hardware.sensor.HiTechnicIRSeekerV2;
+import lejos.robotics.SampleProvider;
 
 aspect RoboStateMachine{
-	private static float irModRead;					// Modulated IR value
-	private static float irUnModRead;				// UnModulated IR value
-	private static float sonarRead;					// Last sonar read by the robot
-	private static boolean robotMoving;				// Check if any of the main motors are moving on the robot
-	private static boolean robotTurning;			// Check if the both of the main motors are moving in the oposite direction
-	private static boolean ballInFront;				// Check if the ball is in front of the robot
-	private static boolean ballClose;				// Sonar says ball is within arms of the robot
-	private static boolean inGoalRange;				// navigator says the robot is within the given kickable goal range
-	private static boolean successfulIrRead;		// Was the last IR read valid?
-	private static boolean successfulSonarRead;		// Was the last sonar read valid?
+	public enum State {
+		INIT, WONDER, GOTO_BALL, TURN_TO_GOAL, DRIBBLE_TO_GOAL,
+		KICK_BALL_TO_GOAL, GAME_OVER
+	}
 	
 	
 	
 	// NOTE: Returning true => that the robot should be in this state
 	public boolean Kicker.WonderState(){
-		successfulIrRead = GetSensorControl().GetAllIrSig();
+		boolean successfulIrRead = GetSensorControl().GetAllIrSig();
 		//successfulSonarRead = GetSensorControl().fetchSonarVal();
-		ballClose = GetSensorControl().BallClose();
+		boolean ballClose = GetSensorControl().BallClose();
 		
 		if(successfulIrRead){
-			irModRead = GetSensorControl().GetLastModIR();
-			irUnModRead = GetSensorControl().GetLastUnModIR();
-		}
-		else{
-			System.out.println("IR Read Error");
-			return true;
-		}
-		
-		/*if(successfulSonarRead)
-			sonarRead = GetSensorControl().GetLastSonar();
-		else{
-			sonarRead = -1;
-			System.out.println("Sonar Read Error");
-			return true;
-		}*/
-		
-		// Check if the robot should stay in the wonder state
-		// Valid IR => just look at IR instead of sonar, otherwise rely on sonar
-		if(successfulIrRead){
+			float irModRead = GetSensorControl().GetLastModIR();
+			float irUnModRead = GetSensorControl().GetLastUnModIR();
 			if(irModRead == 0 || irUnModRead == 0)
 				return false;
 			else
 				return true;
 		}
 		else{
+			System.out.println("IR Read Error");
 			if(ballClose)
 				return false;
 			else
@@ -62,13 +47,13 @@ aspect RoboStateMachine{
 	
 	// Going to ball state
 	public boolean Kicker.GotoBallState(){
-		robotMoving = GetMotionControl().RobotMoving();
-		ballInFront = GetSensorControl().BallInFront();
-		ballClose = GetSensorControl().BallClose();
+		boolean robotMoving = GetMotionControl().RobotMoving();
+		boolean ballInFront = GetSensorControl().BallInFront();
+		boolean ballClose = GetSensorControl().BallClose();
 		
-		irModRead = GetSensorControl().GetLastModIR();
-		irUnModRead = GetSensorControl().GetLastUnModIR();
-		sonarRead = GetSensorControl().GetLastSonar();
+		float irModRead = GetSensorControl().GetLastModIR();
+		float irUnModRead = GetSensorControl().GetLastUnModIR();
+		float sonarRead = GetSensorControl().GetLastSonar();
 		
 		// Check if the robot should remain in the goto ball state
 		if(ballInFront && robotMoving && !ballClose)
@@ -79,14 +64,14 @@ aspect RoboStateMachine{
 	
 	// Turning to goal state
 	public boolean Kicker.TurnToGoalState(){
-		robotMoving = GetMotionControl().RobotMoving();
-		robotTurning = GetMotionControl().RobotTurning();
-		ballInFront = GetSensorControl().BallInFront();
-		ballClose = GetSensorControl().BallClose();
+		boolean robotMoving = GetMotionControl().RobotMoving();
+		boolean robotTurning = GetMotionControl().RobotTurning();
+		boolean ballInFront = GetSensorControl().BallInFront();
+		boolean ballClose = GetSensorControl().BallClose();
 		
-		irModRead = GetSensorControl().GetLastModIR();
-		irUnModRead = GetSensorControl().GetLastUnModIR();
-		sonarRead = GetSensorControl().GetLastSonar();
+		float irModRead = GetSensorControl().GetLastModIR();
+		float irUnModRead = GetSensorControl().GetLastUnModIR();
+		float sonarRead = GetSensorControl().GetLastSonar();
 		
 		// Ball should remain in front of the robot while turning
 		// NOTE: Need turning check
@@ -98,13 +83,13 @@ aspect RoboStateMachine{
 	
 	
 	public boolean Kicker.DribbleBallState(){
-		inGoalRange = GetMotionControl().InGoalRange();
-		ballInFront = GetSensorControl().BallInFront();
-		ballClose = GetSensorControl().BallClose();
+		boolean inGoalRange = GetMotionControl().InGoalRange();
+		boolean ballInFront = GetSensorControl().BallInFront();
+		boolean ballClose = GetSensorControl().BallClose();
 		
-		irModRead = GetSensorControl().GetLastModIR();
-		irUnModRead = GetSensorControl().GetLastUnModIR();
-		sonarRead = GetSensorControl().GetLastSonar();
+		float irModRead = GetSensorControl().GetLastModIR();
+		float irUnModRead = GetSensorControl().GetLastUnModIR();
+		float sonarRead = GetSensorControl().GetLastSonar();
 		
 		// Ball should be near and in front robot while moving to goal
 		if(!inGoalRange && ballInFront && ballClose)
@@ -116,13 +101,13 @@ aspect RoboStateMachine{
 	
 	// Kick state
 	public boolean Kicker.KickBallAtGoal(){
-		inGoalRange = GetMotionControl().InGoalRange();
-		ballInFront = GetSensorControl().BallInFront();
-		ballClose = GetSensorControl().BallClose();
+		boolean inGoalRange = GetMotionControl().InGoalRange();
+		boolean ballInFront = GetSensorControl().BallInFront();
+		boolean ballClose = GetSensorControl().BallClose();
 		
-		irModRead = GetSensorControl().GetLastModIR();
-		irUnModRead = GetSensorControl().GetLastUnModIR();
-		sonarRead = GetSensorControl().GetLastSonar();
+		float irModRead = GetSensorControl().GetLastModIR();
+		float irUnModRead = GetSensorControl().GetLastUnModIR();
+		float sonarRead = GetSensorControl().GetLastSonar();
 		
 		// Ball should be with the robot and in the goal range until kick
 		if(inGoalRange && ballInFront && ballClose)
@@ -131,6 +116,75 @@ aspect RoboStateMachine{
 			return false;
 		
 	}
+	
+	
+	// Get the state of the robot
+	// NOTE: This may be the incorrect way of doing this -- depending on what is needed
+	public State Kicker.GetState(){
+		if(this.WonderState())
+			return State.WONDER;
+		else if(this.GotoBallState())
+			return State.GOTO_BALL;
+		else if(this.DribbleBallState())
+			return State.DRIBBLE_TO_GOAL;
+		else if(this.KickBallAtGoal())
+			return State.KICK_BALL_TO_GOAL;
+		else
+			return State.INIT;
+	}
+	
+	
+	
+	// IR -- Mod 
+	pointcut irModChange() : set(float SensorControl.ballDirMod);
+	
+	// IR -- UnMod
+	pointcut irUnModChange() : set(float SensorControl.ballDirUnMod);
+	
+	// Sonar
+	pointcut sonarChange() : set(float[] SensorControl.distanceSample);
+	
+	
+	
+	//***************SENSOR SETUPS************************
+	// Sonar sensor setup
+	pointcut sonarSensorSetup() : set(EV3UltrasonicSensor SensorControl.sonarSensor);
+	
+	// IR sensor setup
+	pointcut irSensorSetup(): set(HiTechnicIRSeekerV2 SensorControl.irSensor);
+	
+	// Compass sensor setup
+	pointcut compassSensorSetup(): set(HiTechnicCompass SensorControl.compassSensor);
+	
+	//***************SAMPLE SETUPS************************
+	
+	
+	// IR Mod sampler
+	pointcut irSeekModeModSetup():set(SampleProvider SensorControl.irSeekModeMod);
+	
+	// IR Un-Mod sampler
+	pointcut irSeekModeUnModSetup():set(SampleProvider SensorControl.irSeekModeUnMod);
+	
+	// Compass sampler
+	pointcut compassSPSetup():set(SampleProvider SensorControl.compassSP);
+	
+	
+	//***************MOTOR SETUPS*************************
+	// Arm setup
+	pointcut armSetup():set(UnregulatedMotor MotionControl.arm);
+	
+	// Left motor setup
+	pointcut leftMotorSetup():set(RegulatedMotor MotionControl.leftMotor);
+	
+	// Right motor setup
+	pointcut rightMotorSetup():set(RegulatedMotor MotionControl.rightMotor);
+	
+	// roboMotor setup
+	pointcut roboMotorSetup():set(Navigator MotionControl.roboMotor);
+	
+	// roboMotor Motion Check -- Internal boolean for Navigator (LeJOS API)
+	pointcut roboMotorMoving():set(Navigator Navigator._keepGoing);
+	
 	
 	// After Init
 	/*pointcut RobotInit():call(public MotionControl(RegulatedMotor, RegulatedMotor,SensorControl,boolean)) ||
