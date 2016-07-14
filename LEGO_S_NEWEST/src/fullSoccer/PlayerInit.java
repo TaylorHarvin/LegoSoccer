@@ -22,7 +22,7 @@ public class PlayerInit {
 			//case Button.ID_UP:
 				System.out.println("Player 1 Selected");
 				Kicker robot = new Kicker();
-				robot.Play();
+				robot.play();
 				
 		//		break;
 		//}
