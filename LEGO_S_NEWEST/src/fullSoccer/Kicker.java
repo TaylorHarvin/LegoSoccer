@@ -25,7 +25,7 @@ public class Kicker {
 	 *	1. The ball has been kicked to the goal
 	 */
 	public void play(){
-		boolean ballKickedToGoal = false;
+		/*boolean ballKickedToGoal = false;
 		//Wonder();
 		while(!ballKickedToGoal){
 			// The ball was found, bring it to the goal
@@ -42,6 +42,11 @@ public class Kicker {
 		//System.out.println("Goal Shot: " + GotoGoal(true));
 		//mainMC.DribbleBall();
 		System.out.println(getBallDirection());
+		*/
+		
+		//!!!TESTING!!!
+		mainSC.getAllIrSig();
+		
 	}
 	
 	
@@ -183,10 +188,25 @@ public class Kicker {
 	 *				 or the ball is not emitting a signal
 	 *
 	 */
-	public boolean ballInFront(){
+	public boolean ballInFront(boolean rePingSensors){
+		boolean sonarSuccess = false;
+		boolean irSuccess = false;
+		
+		//************** Re-Ping Sensors if requested **************************//
+		if(rePingSensors){
+			if(!Float.isNaN(mainSC.getLastSonar()))
+				sonarSuccess = mainSC.fetchSonarVal();
+			if(!Float.isNaN(mainSC.getLastModIR()) || !Float.isNaN(mainSC.getLastUnModIR()))
+				irSuccess = mainSC.getAllIrSig();
+		}
+		else{
+			sonarSuccess = true;
+			irSuccess = true;
+		}
+		
 		
 		//************** Sonar Check **************************//
-		if(mainSC.fetchSonarVal()){
+		if(sonarSuccess){
 			if(mainSC.getLastSonar()< SoccerGlobals.BALL_SONAR_DIST_GRAB){
 				System.out.println("Ball In Grab Dist: "+ mainSC.getLastSonar());
 				return true;
@@ -196,7 +216,7 @@ public class Kicker {
 		
 		
 		//************** IR Check******************************//
-		if(mainSC.getAllIrSig()){
+		if(irSuccess){
 			//************** IR Check -- Modulated*****************//
 			if(!Float.isNaN((mainSC.getLastModIR()))){
 				if(mainSC.getLastModIR() == 0){
@@ -261,7 +281,7 @@ public class Kicker {
 			
 			mainMC.setArmPower(0); // prevent an accidental dribble on the first move
 			
-			while(mainMC.robotMoving() && ballInFront()){
+			while(mainMC.robotMoving() && ballInFront(true)){
 				
 				currHeading = mainMC.getRobotHeading();
 				
@@ -343,7 +363,7 @@ public class Kicker {
 		//this.GotoWaypoint(new Waypoint(this.GetRobotX(),this.GetRobotY(),ballLoc), false);
 		mainMC.turnRobot(ballLoc);
 		// Keep turning until the ball is in front of the robot or the robot hit it's original turn-to-point
-		while(!ballInFront() && mainMC.robotMoving()){
+		while(!ballInFront(true) && mainMC.robotMoving()){
 
 			if(ballIRInvalid){
 				// New ball direction found -- return for main to handle
@@ -354,7 +374,7 @@ public class Kicker {
 			System.out.println("HEADING: " + mainMC.getRobotHeading());
 		}
 		mainMC.stopMotion();
-		if(ballInFront()){
+		if(ballInFront(true)){
 			return true;
 		}
 		else
@@ -379,12 +399,12 @@ public class Kicker {
 		//movePilot.setAngularSpeed(5);
 		mainMC.setLinearSpeed(10);
 		System.out.println("Start Goto");
-		if(!ballInFront()){
+		if(!ballInFront(true)){
 			return false;
 		}
 		else{ // Assumed that the ball is in front at this point -- good to go forward to it
 			mainMC.startMotionForward(10);
-			while((ballInFront() && !ballClose())){
+			while((ballInFront(true) && !ballClose())){
 				Delay.msDelay(50);
 			}
 			mainMC.stopMotion();
@@ -424,7 +444,7 @@ public class Kicker {
 			if(ballInFront){
 				System.out.println("ball in front -- GOTO");
 				ballGrabbable = gotoBall();
-				ballInFront = ballInFront();
+				ballInFront = ballInFront(true);
 				System.out.println("BIF: "+ ballInFront);
 				gotoTry++;
 			}

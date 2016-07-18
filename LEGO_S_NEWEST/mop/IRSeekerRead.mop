@@ -1,0 +1,60 @@
+// LTL 7
+// Robot stops at the ball when it is close enough.
+
+package mop;
+
+import java.io.*;
+import java.util.*;
+import fullSoccer.*;
+import lejos.robotics.navigation.Waypoint;
+
+IRSeekerRead(MotionControl MC, SensorControl sc) {
+	MotionControl currMC = null; 
+	SensorControl currSC = null; 
+	
+	
+	
+	// Handle for the gotoball event
+	event irsigget after(SensorControl SC) returning (boolean irRes):
+		call(public boolean getAllIrSig())&& condition(irRes) && target(SC){
+			currMC = MC;
+			System.out.println("IR Check Event:\nMod: "+SC.GetLastModIR());
+			System.out.println("Un-Mod: "+SC.GetLastUnModIR());
+		}
+	
+	event generalRotate after(double turnAngle, MotionControl MC):
+		call(public boolean rotateTo(double)) && args(turnAngle) && this(MC){
+			currMC = MC;
+			currSC = SC;
+			System.out.println("Turn Angle Event: "+turnAngle);
+		}	
+
+	
+	ltl: [](generalRotate => (*)irsigget)
+	@violation { 
+		System.out.println("!!!IRSeekerRead Fail!!!");
+		
+		// Try to get the IR again -- if it fails again, assume total fail
+		// and do a general turn to the ball and rely on sonar
+		if(currSC.getAllIrSig()){
+			System.out.println("IR Recovered");
+		}
+		else{
+			// Do a 180 degree turn to check if the ball can be seen
+			// NOTE: TurnToBall already handles the 180 degree turn on invalid ir
+			float sonarRead = 99999;
+			// If that initial turn failed, do a 360 degree sonar sweep
+			while(!currMC.TurnToBall()){
+				currMC.GotoWaypoint(new Waypoint(currMC.GetRobotX(),currMC.GetRobotY(),currMC.GetRobotHeading()+360),false);
+				// turn to 360 degrees or until sonar picks up an object
+				while(currMC.RobotMoving() && sonarRead  > SoccerGlobals.SONAR_OBJECT_SEEN){
+					sonarRead = currMC.mainSC.fetchSonarVal();
+					System.out.println("Sonar: " + sonarRead);
+				}
+			}
+		}
+		__RESET;	// This is supposed to reset the monitor
+	}
+
+}
+

@@ -24,13 +24,13 @@ aspect RoboStateMachine{
 	
 	// NOTE: Returning true => that the robot should be in this state
 	public boolean Kicker.WonderState(){
-		boolean successfulIrRead = GetSensorControl().GetAllIrSig();
-		//successfulSonarRead = GetSensorControl().fetchSonarVal();
-		boolean ballClose = GetSensorControl().BallClose();
+		boolean successfulIrRead = getSensorControl().getAllIrSig();
+		//successfulSonarRead = getSensorControl().fetchSonarVal();
+		boolean ballClose = ballClose();
 		
 		if(successfulIrRead){
-			float irModRead = GetSensorControl().GetLastModIR();
-			float irUnModRead = GetSensorControl().GetLastUnModIR();
+			float irModRead = getSensorControl().getLastModIR();
+			float irUnModRead = getSensorControl().getLastUnModIR();
 			if(irModRead == 0 || irUnModRead == 0)
 				return false;
 			else
@@ -47,13 +47,13 @@ aspect RoboStateMachine{
 	
 	// Going to ball state
 	public boolean Kicker.GotoBallState(){
-		boolean robotMoving = GetMotionControl().RobotMoving();
-		boolean ballInFront = GetSensorControl().BallInFront();
-		boolean ballClose = GetSensorControl().BallClose();
+		boolean robotMoving = getMotionControl().robotMoving();
+		boolean ballInFront = ballInFront();
+		boolean ballClose = ballClose();
 		
-		float irModRead = GetSensorControl().GetLastModIR();
-		float irUnModRead = GetSensorControl().GetLastUnModIR();
-		float sonarRead = GetSensorControl().GetLastSonar();
+		float irModRead = getSensorControl().getLastModIR();
+		float irUnModRead = getSensorControl().getLastUnModIR();
+		float sonarRead = getSensorControl().getLastSonar();
 		
 		// Check if the robot should remain in the goto ball state
 		if(ballInFront && robotMoving && !ballClose)
@@ -64,14 +64,14 @@ aspect RoboStateMachine{
 	
 	// Turning to goal state
 	public boolean Kicker.TurnToGoalState(){
-		boolean robotMoving = GetMotionControl().RobotMoving();
-		boolean robotTurning = GetMotionControl().RobotTurning();
-		boolean ballInFront = GetSensorControl().BallInFront();
-		boolean ballClose = GetSensorControl().BallClose();
+		boolean robotMoving = getMotionControl().robotMoving();
+		boolean robotTurning = getMotionControl().robotTurning();
+		boolean ballInFront = ballInFront();
+		boolean ballClose = ballClose();
 		
-		float irModRead = GetSensorControl().GetLastModIR();
-		float irUnModRead = GetSensorControl().GetLastUnModIR();
-		float sonarRead = GetSensorControl().GetLastSonar();
+		float irModRead = getSensorControl().getLastModIR();
+		float irUnModRead = getSensorControl().getLastUnModIR();
+		float sonarRead = getSensorControl().getLastSonar();
 		
 		// Ball should remain in front of the robot while turning
 		// NOTE: Need turning check
@@ -83,13 +83,13 @@ aspect RoboStateMachine{
 	
 	
 	public boolean Kicker.DribbleBallState(){
-		boolean inGoalRange = GetMotionControl().InGoalRange();
-		boolean ballInFront = GetSensorControl().BallInFront();
-		boolean ballClose = GetSensorControl().BallClose();
+		boolean inGoalRange = getMotionControl().inGoalRange();
+		boolean ballInFront = ballInFront();
+		boolean ballClose = ballClose();
 		
-		float irModRead = GetSensorControl().GetLastModIR();
-		float irUnModRead = GetSensorControl().GetLastUnModIR();
-		float sonarRead = GetSensorControl().GetLastSonar();
+		float irModRead = getSensorControl().getLastModIR();
+		float irUnModRead = getSensorControl().getLastUnModIR();
+		float sonarRead = getSensorControl().getLastSonar();
 		
 		// Ball should be near and in front robot while moving to goal
 		if(!inGoalRange && ballInFront && ballClose)
@@ -101,13 +101,13 @@ aspect RoboStateMachine{
 	
 	// Kick state
 	public boolean Kicker.KickBallAtGoal(){
-		boolean inGoalRange = GetMotionControl().InGoalRange();
-		boolean ballInFront = GetSensorControl().BallInFront();
-		boolean ballClose = GetSensorControl().BallClose();
+		boolean inGoalRange = getMotionControl().inGoalRange();
+		boolean ballInFront = ballInFront();
+		boolean ballClose = ballClose();
 		
-		float irModRead = GetSensorControl().GetLastModIR();
-		float irUnModRead = GetSensorControl().GetLastUnModIR();
-		float sonarRead = GetSensorControl().GetLastSonar();
+		float irModRead = getSensorControl().getLastModIR();
+		float irUnModRead = getSensorControl().getLastUnModIR();
+		float sonarRead = getSensorControl().getLastSonar();
 		
 		// Ball should be with the robot and in the goal range until kick
 		if(inGoalRange && ballInFront && ballClose)
@@ -133,57 +133,115 @@ aspect RoboStateMachine{
 			return State.INIT;
 	}
 	
-	
+	pointcut play(Kicker MK) : call(public void Kicker.play()) && this(MK);
 	
 	// IR -- Mod 
-	pointcut irModChange() : set(float SensorControl.ballDirMod);
+	pointcut irModChange(Kicker MK) : cflow(play(MK)) && set(float SensorControl.ballDirMod);
+	after(Kicker MK):irModChange(MK){
+		
+	}
+	
 	
 	// IR -- UnMod
-	pointcut irUnModChange() : set(float SensorControl.ballDirUnMod);
+	pointcut irUnModChange(Kicker MK) :cflow(play(MK)) && set(float SensorControl.ballDirUnMod);
+	after(Kicker MK):irUnModChange(MK){
+		
+	}
 	
 	// Sonar
-	pointcut sonarChange() : set(float[] SensorControl.distanceSample);
-	
+	pointcut sonarChange(Kicker MK) : cflow(play(MK)) && set(float[] SensorControl.distanceSample);
+	after(Kicker MK):sonarChange(MK){
+		
+	}
 	
 	
 	//***************SENSOR SETUPS************************
 	// Sonar sensor setup
-	pointcut sonarSensorSetup() : set(EV3UltrasonicSensor SensorControl.sonarSensor);
+	pointcut sonarSensorSetup(/*Kicker MK*/) : /*cflow(play(MK)) &&*/ set(EV3UltrasonicSensor SensorControl.sonarSensor);
+	//after(Kicker MK):sonarSensorSetup(MK){}
+	
+	
 	
 	// IR sensor setup
-	pointcut irSensorSetup(): set(HiTechnicIRSeekerV2 SensorControl.irSensor);
+	pointcut irSensorSetup(/*Kicker MK*/): /*cflow(play(MK)) &&*/ set(HiTechnicIRSeekerV2 SensorControl.irSensor);
+	//after(Kicker MK):irSensorSetup(MK){}
+	
 	
 	// Compass sensor setup
-	pointcut compassSensorSetup(): set(HiTechnicCompass SensorControl.compassSensor);
+	//pointcut compassSensorSetup(Kicker MK): cflow(play(MK)) && set(HiTechnicCompass SensorControl.compassSensor);
+	//after(Kicker MK):compassSensorSetup(MK){
+		
+	//}
+	
+	
 	
 	//***************SAMPLE SETUPS************************
 	
 	
 	// IR Mod sampler
-	pointcut irSeekModeModSetup():set(SampleProvider SensorControl.irSeekModeMod);
+	pointcut irSeekModeModSetup(Kicker MK):cflow(play(MK)) && set(SampleProvider SensorControl.irSeekModeMod);
+	after(Kicker MK):irSeekModeModSetup(MK){
+		
+	}
+	
+	
 	
 	// IR Un-Mod sampler
-	pointcut irSeekModeUnModSetup():set(SampleProvider SensorControl.irSeekModeUnMod);
+	pointcut irSeekModeUnModSetup(Kicker MK):cflow(play(MK)) && set(SampleProvider SensorControl.irSeekModeUnMod);
+	after(Kicker MK):irSeekModeUnModSetup(MK){
+		
+	}
+	
+	
+	
 	
 	// Compass sampler
-	pointcut compassSPSetup():set(SampleProvider SensorControl.compassSP);
+	//pointcut compassSPSetup(Kicker MK):cflow(play(MK)) && set(SampleProvider SensorControl.compassSP);
+	//after(Kicker MK):compassSPSetup(MK){}
+	
 	
 	
 	//***************MOTOR SETUPS*************************
 	// Arm setup
-	pointcut armSetup():set(UnregulatedMotor MotionControl.arm);
+	pointcut armSetup(Kicker MK):cflow(play(MK)) && set(UnregulatedMotor MotionControl.arm);
+	after(Kicker MK):armSetup(MK){
+		
+	}
+	
+	
 	
 	// Left motor setup
-	pointcut leftMotorSetup():set(RegulatedMotor MotionControl.leftMotor);
+	pointcut leftMotorSetup(Kicker MK):cflow(play(MK)) && set(RegulatedMotor MotionControl.leftMotor);
+	after(Kicker MK):leftMotorSetup(MK){
+		
+	}
+	
+	
 	
 	// Right motor setup
-	pointcut rightMotorSetup():set(RegulatedMotor MotionControl.rightMotor);
+	pointcut rightMotorSetup(Kicker MK):cflow(play(MK)) && set(RegulatedMotor MotionControl.rightMotor);
+	after(Kicker MK):rightMotorSetup(MK){
+		
+	}
+	
+	
 	
 	// roboMotor setup
-	pointcut roboMotorSetup():set(Navigator MotionControl.roboMotor);
+	pointcut roboMotorSetup(Kicker MK):cflow(play(MK)) && set(Navigator MotionControl.roboMotor);
+	after(Kicker MK):roboMotorSetup(MK){
+		
+	}
+	
+	
+	
 	
 	// roboMotor Motion Check -- Internal boolean for Navigator (LeJOS API)
-	pointcut roboMotorMoving():set(Navigator Navigator._keepGoing);
+	pointcut roboMotorMoving(/*Kicker MK*/):/*cflow(play(MK)) &&*/ set(Navigator Navigator._keepGoing);
+	//after(Kicker MK):roboMotorMoving(MK){}
+	
+	
+	
+	
 	
 	
 	// After Init

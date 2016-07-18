@@ -1,0 +1,104 @@
+Battery Current: 0.1823362
+Battery Voltage: 7.5902524
+Choose Player
+Player 1 Selected
+Calib Compass? -- UP
+Ball not in front -- after GOTO
+-60.0
+-60.0
+Init Heading: 0.0
+Final: -60.0
+Ball in Front: 0.326
+Ball in front: true
+Ball in Front: 0.51100004
+Ball in front: true
+ball in front -- GOTO
+Start Goto
+Ball in Front: 0.51100004
+Ball in front: true
+Ball in Front: 0.51100004
+Ball in front: true
+Ball in Front: 0.147
+Ball in front: true
+Ball in Front: 0.112
+Ball in front: true
+Stop Goto -- Ball Close
+Attempt LTL Violation NOW
+Returning Goto
+Goto Ball EVENT: true
+Ball in front:false
+!!!BallInFrontAtGoto LTL FAIL!!!
+Re-Attempting FindAndGrabBall
+-75.0
+-75.0
+Init Heading: -59.684544
+Final: -134.68454
+Ball in Front: 0.149
+Ball in front: true
+Ball in Front: 0.149
+Ball in front: true
+Wonder Worked
+Goal Shot: true
+Ball not in front -- after GOTO
+-0.0
+-0.0
+Init Heading: -134.47
+Final: -134.47
+Ball in Front: 0.149
+Ball in front: true
+Ball in Front: 0.149
+Ball in front: true
+ball in front -- GOTO
+Start Goto
+Ball in Front: 0.149
+Ball in front: true
+Ball in Front: 0.149
+Ball in front: true
+Ball in Front: 0.11800001
+Ball in front: true
+Ball in Front: 0.093
+Ball in front: true
+Stop Goto -- Ball Close
+Attempt LTL Violation NOW
+Returning Goto
+Goto Ball EVENT: true
+Ball in front:false
+!!!BallInFrontAtGoto LTL FAIL!!!
+Re-Attempting FindAndGrabBall
+120.0
+120.0
+Init Heading: -134.47
+Final: -14.470001
+Ball in Front: 0.101
+Ball in front: true
+Wonder Worked
+Goal Shot: true
+Ball not in front -- after GOTO
+-0.0
+-0.0
+Init Heading: -14.561592
+Final: -14.561592
+Ball in Front: 0.109000005
+Ball in front: true
+Ball in Front: 0.113000005
+Ball in front: true
+ball in front -- GOTO
+Start Goto
+Ball in Front: 0.13000001
+Ball in front: true
+Ball in Front: 0.113000005
+Ball in front: true
+Ball in Front: 0.082
+Ball in front: true
+Stop Goto -- Ball Close
+Attempt LTL Violation NOW
+Returning Goto
+Goto Ball EVENT: true
+Ball in front:false
+!!!BallInFrontAtGoto LTL FAIL!!!
+Re-Attempting FindAndGrabBall
+60.0
+60.0
+Init Heading: -14.561592
+Final: 45.438408
+Program finished

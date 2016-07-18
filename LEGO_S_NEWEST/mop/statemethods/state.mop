@@ -1,0 +1,23 @@
+package mop;
+
+import java.io.*;
+import java.util.*;
+import fullSoccer.*;
+import lejos.robotics.navigation.Waypoint;
+import lejos.utility.Delay;
+
+state(Kicker MK) {
+	MotionControl currMC;
+	
+
+	event test1 before(Kicker MK):
+		set(float SensorControl.ballDirMod)&&this(MK){
+			System.out.println("Test Event");
+			//currMC = MK.GetMotionControl();
+		}	
+	/*event test2 before(Kicker MK):
+		set(SensorControl Kicker.mainSC)&&this(MK){
+			System.out.println("Test Event");
+			//currMC = MK.GetMotionControl();
+		}	*/
+}

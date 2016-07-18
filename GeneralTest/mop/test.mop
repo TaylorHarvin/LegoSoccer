@@ -1,0 +1,18 @@
+// From LTL 1 
+// 1. Ball is in front of the robot after goto ball
+
+package mop;
+
+import java.io.*;
+import java.util.*;
+import base.ChildTest;
+import base.TestParent;
+
+testmop(ChildTest baseChild,TestParent baseParent) {
+	event genEvent after(ChildTest baseChild):set(float ChildTest.val)&&this(baseChild){
+		//System.out.println(baseParent.GetTestObj());
+	}
+	
+
+}
+

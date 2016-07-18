@@ -1,0 +1,172 @@
+Battery Current: 0.18884818
+Battery Voltage: 7.414754
+Choose Player
+Player 1 Selected
+Calib Compass? -- UP
+Ball not in front -- after GOTO
+-60.0
+-60.0
+Init Heading: 0.0
+Final: -60.0
+Ball in Front: 0.143
+Ball in Front: 0.143
+ball in front -- GOTO
+Start Goto
+Ball in Front: 0.147
+Ball in Front: 0.147
+Ball in Front: 0.109000005
+Ball In Grab Dist: 0.065000005
+Stop Goto -- Ball Close
+Attempt LTL Violation NOW
+Wonder status: true
+Wonder Worked
+Goal Shot: true
+Ball not in front -- after GOTO
+-0.0
+15.0
+Init Heading: -60.04409
+Final: -45.04409
+Ball In Grab Dist: 0.049000002
+Ball In Grab Dist: 0.049000002
+ball in front -- GOTO
+Start Goto
+Ball In Grab Dist: 0.049000002
+Ball In Grab Dist: 0.049000002
+Stop Goto -- Ball Close
+Attempt LTL Violation NOW
+Wonder status: true
+!!!GOTO_GOAL LTL FAIL!!!
+Applying Recovery Goto
+GOING TO GOAL
+Ball In Grab Dist: 0.051000003
+Goal Range: 158.5193
+Ball In Grab Dist: 0.051000003
+Goal Range: 158.5193
+Ball In Grab Dist: 0.05
+Goal Range: 158.5193
+Ball In Grab Dist: 0.05
+Goal Range: 158.49911
+Ball In Grab Dist: 0.05
+Goal Range: 158.51947
+Ball In Grab Dist: 0.05
+Goal Range: 158.51947
+Ball In Grab Dist: 0.051000003
+Goal Range: 158.51947
+Ball In Grab Dist: 0.05
+Goal Range: 158.51947
+Ball In Grab Dist: 0.051000003
+Goal Range: 158.51947
+Ball In Grab Dist: 0.051000003
+Goal Range: 158.49876
+Ball In Grab Dist: 0.051000003
+Goal Range: 158.49876
+Ball In Grab Dist: 0.051000003
+Goal Range: 156.88681
+Ball In Grab Dist: 0.044000003
+Goal Range: 155.38539
+Ball In Grab Dist: 0.038000003
+Goal Range: 152.21687
+Ball In Grab Dist: 0.036000002
+Goal Range: 149.46288
+Ball in Front: 0.091000006
+Goal Range: 143.6474
+Wonder Worked
+Goal Shot: true
+Ball not in front -- after GOTO
+-120.0
+-120.0
+Init Heading: -24.449087
+Final: -144.62886
+HEADING: -24.62886
+HEADING: -24.62886
+HEADING: -24.62886
+HEADING: -24.62886
+HEADING: -24.62886
+HEADING: -24.62886
+HEADING: -24.62886
+HEADING: -24.62886
+HEADING: -24.62886
+HEADING: -24.62886
+HEADING: -24.62886
+HEADING: -24.449087
+HEADING: -24.808632
+HEADING: -24.628859
+HEADING: -24.808632
+HEADING: -24.269314
+HEADING: -24.628859
+HEADING: -24.628859
+HEADING: -24.808632
+HEADING: -24.808632
+HEADING: -24.628859
+HEADING: -24.808632
+HEADING: -24.808632
+HEADING: -24.449087
+HEADING: -24.449087
+HEADING: -24.808632
+HEADING: -24.628859
+Ball in Front: 0.48700002
+Ball in Front: 0.326
+ball in front -- GOTO
+Start Goto
+Ball in Front: 0.326
+Ball in Front: 1.5730001
+Stop Goto -- Ball Not Close
+Ball not in front -- after GOTO
+-60.0
+-60.0
+Init Heading: -24.628859
+Final: -84.62886
+Ball in Front: 0.095000006
+Ball in Front: 0.091000006
+ball in front -- GOTO
+Start Goto
+Ball in Front: 0.086
+Ball In Grab Dist: 0.074
+Stop Goto -- Ball Close
+Attempt LTL Violation NOW
+Wonder status: true
+Wonder Worked
+Goal Shot: true
+Ball not in front -- after GOTO
+120.0
+120.0
+Init Heading: -84.49318
+Final: 35.50682
+Ball in Front: 0.08400001
+Ball in Front: 0.08400001
+ball in front -- GOTO
+Start Goto
+Ball in Front: 0.08400001
+Ball in Front: 0.08400001
+Stop Goto -- Ball Close
+Attempt LTL Violation NOW
+Wonder status: true
+!!!GOTO_GOAL LTL FAIL!!!
+Applying Recovery GotoGOING TO GOAL
+
+Ball In Grab Dist: 0.049000002
+Goal Range: 54.66385
+Ball In Grab Dist: 0.046000004
+Goal Range: 54.66385
+Ball In Grab Dist: 0.046000004
+Goal Range: 54.66385
+Ball In Grab Dist: 0.046000004
+Goal Range: 54.66385
+Ball In Grab Dist: 0.046000004
+Goal Range: 54.66385
+Ball In Grab Dist: 0.046000004
+Goal Range: 54.646698
+Ball In Grab Dist: 0.046000004
+Goal Range: 54.663902
+Ball In Grab Dist: 0.049000002
+Goal Range: 54.663902
+Ball In Grab Dist: 0.049000002
+Goal Range: 54.66659
+Ball In Grab Dist: 0.044000003
+Goal Range: 54.648674
+Ball In Grab Dist: 0.044000003
+Goal Range: 54.648674
+Ball In Grab Dist: 0.044000003
+Goal Range: 54.650444
+Echo stream Exception: java.io.IOException: Stream closed
+Program finished

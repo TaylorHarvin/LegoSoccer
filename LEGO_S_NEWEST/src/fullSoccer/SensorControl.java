@@ -63,14 +63,14 @@ public class SensorControl {
 			//compassSP = compassSensor.getCompassMode();
 			
 			//************Compass Calibration************************//
-			/*System.out.println("Calib Compass? -- UP");
+			System.out.println("Calib Compass? -- UP");
 			if(Button.waitForAnyPress() == Button.ID_UP){
 				System.out.println("Start Calib");
-				compassSensor.startCalibration();
+				//compassSensor.startCalibration();
 				Button.waitForAnyPress();
-				compassSensor.stopCalibration();
+				//compassSensor.stopCalibration();
 				System.out.println("End Calib");
-			}*/
+			}
 		}
 		else{
 			try {

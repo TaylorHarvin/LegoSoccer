@@ -1,0 +1,55 @@
+// LTL 7
+// Robot stops at the ball when it is close enough.
+
+package mop;
+
+import java.io.*;
+import java.util.*;
+import fullSoccer.*;
+
+StopAtBallAfterGoto(MotionControl MC) {
+	MotionControl currMC = null; // Allows for usage of MC in the ltl violation
+	boolean ballInFrontFlag = false;
+	boolean ballCloseFlag = false;
+	
+	
+	// Handle for the gotoball event
+	event gotoball after(MotionControl MC) returning (boolean gotoRes):
+		call(public boolean GotoBall())&& condition(gotoRes) && target(MC){
+			currMC = MC;
+			System.out.println("Goto Ball EVENT: " + gotoRes);
+			System.out.println("Ball in front:" + MC.mainSC.BallInFront());
+			// Allows usage of MC in the LTL violation if needed
+			//ballInFrontFlag = MC.BallInFront();
+			//ballCloseFlag = MC.BallClose();
+		}
+	
+	// Handle for the ball in front event
+	event ballinfront after(MotionControl MC) returning (boolean res):
+		call(public boolean BallInFront()) && condition(res) && this(MC){
+			currMC = MC;
+			System.out.println("Ball in front: "+ res);
+			/*if(!res){
+				MC.FindAndGrabBall();
+			}*/
+		}
+	
+	event ballclose after(MotionControl MC) returning (boolean res):
+		call(public boolean BallClose()) && condition(res) && this(MC){
+			currMC = MC;
+			System.out.println("Ball close event: "+ res);
+		}
+	
+
+	
+	ltl: [](gotoball U (ballinfront and ballclose))
+	@violation { 
+		System.out.println("!!!StopAtBallAfterGoto LTL FAIL!!!");
+		System.out.println("!!!STOPPING ROBOT!!!");
+		//MC.FindAndGrabBall();
+		currMC.FindAndGrabBall();
+		__RESET;	// This is supposed to reset the monitor
+	}
+
+}
+
