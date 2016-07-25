@@ -1,4 +1,3 @@
-package mop;
 import java.io.*;
 import java.util.*;
 import fullSoccer.*;
@@ -19,13 +18,14 @@ import com.runtimeverification.rvmonitor.java.rt.tablebase.TerminatedMonitorClea
 import java.util.concurrent.atomic.AtomicInteger;
 import org.aspectj.lang.*;
 
+
 final class BallInFrontAtGotoBallMonitor_Set extends com.runtimeverification.rvmonitor.java.rt.tablebase.AbstractMonitorSet<BallInFrontAtGotoBallMonitor> {
 
 	BallInFrontAtGotoBallMonitor_Set(){
 		this.size = 0;
 		this.elements = new BallInFrontAtGotoBallMonitor[4];
 	}
-	final void event_gotoball(Kicker MK, boolean gotoRes) {
+	final void event_gotoball(Kicker MK) {
 		int numAlive = 0 ;
 		for(int i = 0; i < this.size; i++){
 			BallInFrontAtGotoBallMonitor monitor = this.elements[i];
@@ -34,7 +34,7 @@ final class BallInFrontAtGotoBallMonitor_Set extends com.runtimeverification.rvm
 				numAlive++;
 
 				final BallInFrontAtGotoBallMonitor monitorfinalMonitor = monitor;
-				monitor.Prop_1_event_gotoball(MK, gotoRes);
+				monitor.Prop_1_event_gotoball(MK);
 				if(monitorfinalMonitor.Prop_1_Category_violation) {
 					monitorfinalMonitor.Prop_1_handler_violation();
 				}
@@ -45,7 +45,7 @@ final class BallInFrontAtGotoBallMonitor_Set extends com.runtimeverification.rvm
 		}
 		size = numAlive;
 	}
-	final void event_ballinfront(Kicker MK, boolean res) {
+	final void event_ballinfront_true(Kicker MK, boolean res) {
 		int numAlive = 0 ;
 		for(int i = 0; i < this.size; i++){
 			BallInFrontAtGotoBallMonitor monitor = this.elements[i];
@@ -54,7 +54,27 @@ final class BallInFrontAtGotoBallMonitor_Set extends com.runtimeverification.rvm
 				numAlive++;
 
 				final BallInFrontAtGotoBallMonitor monitorfinalMonitor = monitor;
-				monitor.Prop_1_event_ballinfront(MK, res);
+				monitor.Prop_1_event_ballinfront_true(MK, res);
+				if(monitorfinalMonitor.Prop_1_Category_violation) {
+					monitorfinalMonitor.Prop_1_handler_violation();
+				}
+			}
+		}
+		for(int i = numAlive; i < this.size; i++){
+			this.elements[i] = null;
+		}
+		size = numAlive;
+	}
+	final void event_ballinfront_false(Kicker MK, boolean res) {
+		int numAlive = 0 ;
+		for(int i = 0; i < this.size; i++){
+			BallInFrontAtGotoBallMonitor monitor = this.elements[i];
+			if(!monitor.isTerminated()){
+				elements[numAlive] = monitor;
+				numAlive++;
+
+				final BallInFrontAtGotoBallMonitor monitorfinalMonitor = monitor;
+				monitor.Prop_1_event_ballinfront_false(MK, res);
 				if(monitorfinalMonitor.Prop_1_Category_violation) {
 					monitorfinalMonitor.Prop_1_handler_violation();
 				}
@@ -80,8 +100,9 @@ class BallInFrontAtGotoBallMonitor extends com.runtimeverification.rvmonitor.jav
 
 	Kicker currMK = null;
 
-	static final int Prop_1_transition_gotoball[] = {1, 2, 2};;
-	static final int Prop_1_transition_ballinfront[] = {0, 2, 2};;
+	static final int Prop_1_transition_gotoball[] = {1, 2, 3, 3};;
+	static final int Prop_1_transition_ballinfront_true[] = {0, 0, 3, 3};;
+	static final int Prop_1_transition_ballinfront_false[] = {0, 2, 3, 3};;
 
 	volatile boolean Prop_1_Category_violation = false;
 
@@ -122,35 +143,48 @@ class BallInFrontAtGotoBallMonitor extends com.runtimeverification.rvmonitor.jav
 		return nextstate;
 	}
 
-	final boolean Prop_1_event_gotoball(Kicker MK, boolean gotoRes) {
+	final boolean Prop_1_event_gotoball(Kicker MK) {
 		{
-			if ( ! (gotoRes) ) {
-				return false;
-			}
-			{
-				currMK = MK;
-				System.out.println("Goto Ball EVENT: " + gotoRes);
-			}
+			currMK = MK;
+			System.out.println("Goto Ball EVENT");
 		}
 
 		int nextstate = this.handleEvent(0, Prop_1_transition_gotoball) ;
-		this.Prop_1_Category_violation = nextstate == 1;
+		this.Prop_1_Category_violation = nextstate == 2;
 
 		return true;
 	}
 
-	final boolean Prop_1_event_ballinfront(Kicker MK, boolean res) {
+	final boolean Prop_1_event_ballinfront_true(Kicker MK, boolean res) {
 		{
 			if ( ! (res) ) {
 				return false;
 			}
 			{
 				currMK = MK;
+				System.out.println("EVENT Ball in front: " + res);
 			}
 		}
 
-		int nextstate = this.handleEvent(1, Prop_1_transition_ballinfront) ;
-		this.Prop_1_Category_violation = nextstate == 1;
+		int nextstate = this.handleEvent(1, Prop_1_transition_ballinfront_true) ;
+		this.Prop_1_Category_violation = nextstate == 2;
+
+		return true;
+	}
+
+	final boolean Prop_1_event_ballinfront_false(Kicker MK, boolean res) {
+		{
+			if ( ! (!res) ) {
+				return false;
+			}
+			{
+				currMK = MK;
+				System.out.println("EVENT Ball in front: " + res);
+			}
+		}
+
+		int nextstate = this.handleEvent(2, Prop_1_transition_ballinfront_false) ;
+		this.Prop_1_Category_violation = nextstate == 2;
 
 		return true;
 	}
@@ -190,9 +224,24 @@ class BallInFrontAtGotoBallMonitor extends com.runtimeverification.rvmonitor.jav
 			return;
 			case 0:
 			//gotoball
-			return;
+			//alive_MK
+			if(!(alive_parameters_0)){
+				RVM_terminated = true;
+				return;
+			}
+			break;
+
 			case 1:
-			//ballinfront
+			//ballinfront_true
+			//alive_MK
+			if(!(alive_parameters_0)){
+				RVM_terminated = true;
+				return;
+			}
+			break;
+
+			case 2:
+			//ballinfront_false
 			//alive_MK
 			if(!(alive_parameters_0)){
 				RVM_terminated = true;
@@ -205,11 +254,11 @@ class BallInFrontAtGotoBallMonitor extends com.runtimeverification.rvmonitor.jav
 	}
 
 	public static int getNumberOfEvents() {
-		return 2;
+		return 3;
 	}
 
 	public static int getNumberOfStates() {
-		return 3;
+		return 4;
 	}
 
 }
@@ -248,7 +297,7 @@ class BallInFrontAtGotoBallRuntimeMonitor implements com.runtimeverification.rvm
 		RuntimeOption.enableFineGrainedLock(false) ;
 	}
 
-	public static final void gotoballEvent(Kicker MK, boolean gotoRes) {
+	public static final void gotoballEvent(Kicker MK) {
 		BallInFrontAtGotoBall_activated = true;
 		while (!BallInFrontAtGotoBall_RVMLock.tryLock()) {
 			Thread.yield();
@@ -284,7 +333,7 @@ class BallInFrontAtGotoBallRuntimeMonitor implements com.runtimeverification.rvm
 		}
 		// D(X) main:8--9
 		final BallInFrontAtGotoBallMonitor matchedEntryfinalMonitor = matchedEntry;
-		matchedEntry.Prop_1_event_gotoball(MK, gotoRes);
+		matchedEntry.Prop_1_event_gotoball(MK);
 		if(matchedEntryfinalMonitor.Prop_1_Category_violation) {
 			matchedEntryfinalMonitor.Prop_1_handler_violation();
 		}
@@ -297,7 +346,7 @@ class BallInFrontAtGotoBallRuntimeMonitor implements com.runtimeverification.rvm
 		BallInFrontAtGotoBall_RVMLock.unlock();
 	}
 
-	public static final void ballinfrontEvent(Kicker MK, boolean res) {
+	public static final void ballinfront_trueEvent(Kicker MK, boolean res) {
 		BallInFrontAtGotoBall_activated = true;
 		while (!BallInFrontAtGotoBall_RVMLock.tryLock()) {
 			Thread.yield();
@@ -333,7 +382,56 @@ class BallInFrontAtGotoBallRuntimeMonitor implements com.runtimeverification.rvm
 		}
 		// D(X) main:8--9
 		final BallInFrontAtGotoBallMonitor matchedEntryfinalMonitor = matchedEntry;
-		matchedEntry.Prop_1_event_ballinfront(MK, res);
+		matchedEntry.Prop_1_event_ballinfront_true(MK, res);
+		if(matchedEntryfinalMonitor.Prop_1_Category_violation) {
+			matchedEntryfinalMonitor.Prop_1_handler_violation();
+		}
+
+		if ((cachehit == false) ) {
+			BallInFrontAtGotoBall_MK_Map_cachekey_MK = MK;
+			BallInFrontAtGotoBall_MK_Map_cachevalue = matchedEntry;
+		}
+
+		BallInFrontAtGotoBall_RVMLock.unlock();
+	}
+
+	public static final void ballinfront_falseEvent(Kicker MK, boolean res) {
+		BallInFrontAtGotoBall_activated = true;
+		while (!BallInFrontAtGotoBall_RVMLock.tryLock()) {
+			Thread.yield();
+		}
+
+		CachedWeakReference wr_MK = null;
+		MapOfMonitor<BallInFrontAtGotoBallMonitor> matchedLastMap = null;
+		BallInFrontAtGotoBallMonitor matchedEntry = null;
+		boolean cachehit = false;
+		if ((MK == BallInFrontAtGotoBall_MK_Map_cachekey_MK) ) {
+			matchedEntry = BallInFrontAtGotoBall_MK_Map_cachevalue;
+			cachehit = true;
+		}
+		else {
+			wr_MK = new CachedWeakReference(MK) ;
+			{
+				// FindOrCreateEntry
+				MapOfMonitor<BallInFrontAtGotoBallMonitor> itmdMap = BallInFrontAtGotoBall_MK_Map;
+				matchedLastMap = itmdMap;
+				BallInFrontAtGotoBallMonitor node_MK = BallInFrontAtGotoBall_MK_Map.getNodeEquivalent(wr_MK) ;
+				matchedEntry = node_MK;
+			}
+		}
+		// D(X) main:1
+		if ((matchedEntry == null) ) {
+			if ((wr_MK == null) ) {
+				wr_MK = new CachedWeakReference(MK) ;
+			}
+			// D(X) main:4
+			BallInFrontAtGotoBallMonitor created = new BallInFrontAtGotoBallMonitor() ;
+			matchedEntry = created;
+			matchedLastMap.putNode(wr_MK, created) ;
+		}
+		// D(X) main:8--9
+		final BallInFrontAtGotoBallMonitor matchedEntryfinalMonitor = matchedEntry;
+		matchedEntry.Prop_1_event_ballinfront_false(MK, res);
 		if(matchedEntryfinalMonitor.Prop_1_Category_violation) {
 			matchedEntryfinalMonitor.Prop_1_handler_violation();
 		}
@@ -347,6 +445,7 @@ class BallInFrontAtGotoBallRuntimeMonitor implements com.runtimeverification.rvm
 	}
 
 }
+
 
 
 aspect BaseAspect {
@@ -375,13 +474,16 @@ public aspect BallInFrontAtGotoBallMonitorAspect implements com.runtimeverificat
 
 	pointcut MOP_CommonPointCut() : !within(com.runtimeverification.rvmonitor.java.rt.RVMObject+) && !adviceexecution() && BaseAspect.notwithin();
 	pointcut BallInFrontAtGotoBall_gotoball(Kicker MK) : (call(public boolean gotoBall()) && target(MK)) && MOP_CommonPointCut();
-	after (Kicker MK) returning (boolean gotoRes) : BallInFrontAtGotoBall_gotoball(MK) {
-		BallInFrontAtGotoBallRuntimeMonitor.gotoballEvent(MK, gotoRes);
+	after (Kicker MK) : BallInFrontAtGotoBall_gotoball(MK) {
+		BallInFrontAtGotoBallRuntimeMonitor.gotoballEvent(MK);
 	}
 
-	pointcut BallInFrontAtGotoBall_ballinfront(Kicker MK) : (call(public boolean ballInFront()) && this(MK)) && MOP_CommonPointCut();
-	after (Kicker MK) returning (boolean res) : BallInFrontAtGotoBall_ballinfront(MK) {
-		BallInFrontAtGotoBallRuntimeMonitor.ballinfrontEvent(MK, res);
+	pointcut BallInFrontAtGotoBall_ballinfront_true(Kicker MK) : (call(public boolean Kicker.ballInFront(boolean)) && this(MK)) && MOP_CommonPointCut();
+	after (Kicker MK) returning (boolean res) : BallInFrontAtGotoBall_ballinfront_true(MK) {
+		//BallInFrontAtGotoBall_ballinfront_true
+		BallInFrontAtGotoBallRuntimeMonitor.ballinfront_trueEvent(MK, res);
+		//BallInFrontAtGotoBall_ballinfront_false
+		BallInFrontAtGotoBallRuntimeMonitor.ballinfront_falseEvent(MK, res);
 	}
 
 }

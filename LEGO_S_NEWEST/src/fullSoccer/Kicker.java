@@ -14,7 +14,7 @@ public class Kicker {
 	
 	public Kicker(){
 		mainSC = new SensorControl(SensorPort.S2, SensorPort.S3, SensorPort.S4,simEnabled);
-		mainMC = new MotionControl(new EV3LargeRegulatedMotor(MotorPort.A), new EV3LargeRegulatedMotor(MotorPort.D),simEnabled);
+		mainMC = new MotionControl(MotorPort.A, MotorPort.D, MotorPort.C,simEnabled);
 	}
 	
 	/* Full soccer game
@@ -25,7 +25,7 @@ public class Kicker {
 	 *	1. The ball has been kicked to the goal
 	 */
 	public void play(){
-		/*boolean ballKickedToGoal = false;
+		boolean ballKickedToGoal = false;
 		//Wonder();
 		while(!ballKickedToGoal){
 			// The ball was found, bring it to the goal
@@ -42,11 +42,34 @@ public class Kicker {
 		//System.out.println("Goal Shot: " + GotoGoal(true));
 		//mainMC.DribbleBall();
 		System.out.println(getBallDirection());
-		*/
+		
 		
 		//!!!TESTING!!!
-		mainSC.getAllIrSig();
+			//mainSC.getAllIrSig();
+			//System.out.println("ENDING");
+			//Delay.msDelay(5000);
+			//while(true)
+			// !!!Ball in front after goto ball Direct TEST!!!
+			/*gotoBall();
+			ballInFront(true);
+			System.out.println("Try Goto Again");
+			Delay.msDelay(2000);
+			gotoBall();
+			ballInFront(true);*/
+			
+			//!!!Has Ball At Kick Test!!!
+			/*System.out.println("Ball Kick TEST");
+			Delay.msDelay(2000);
+			this.ballKickable(true);
+			this.ballInFront(true);
+			this.kickBall(20, 100, 20, 100, 200, 1000);*/
+			
+			// Constructor error test
+			//mainSC = new SensorControl(SensorPort.S2, SensorPort.S3, SensorPort.S4,true);
 		
+			// Goto LTL test -- stop calling goto after the ball is already in reach
+			/*while(true)
+				this.gotoBall();*/
 	}
 	
 	
@@ -76,6 +99,18 @@ public class Kicker {
 	public SensorControl getSensorControl(){
 		return mainSC;
 	}
+	
+	// set the main motion controller
+	public void setMotionControl(MotionControl newMC){
+		mainMC = newMC;
+	}
+	
+	
+	// set the main sensor controller
+	public void setSensorControl(SensorControl newSC){
+		mainSC = newSC;
+	}
+	
 	
 	//***********************SENSOR CONTROL PARTS*******************
 	/*	Averages the IR reads of the robot in relation to the ball signal
@@ -136,9 +171,14 @@ public class Kicker {
 	 *				 and is as close to the robot's sonar as possible
 	 *			2.1.1. OR sonar failed
 	 */
-	public boolean ballClose(){
+	public boolean ballClose(boolean rePingSensor){
+		boolean sonarSuccess = false;
+		if(rePingSensor){
+			sonarSuccess = mainSC.fetchSonarVal();
+		}
+		
 		// Check if sonar worked and grabbed sonar value
-		if(mainSC.fetchSonarVal()){
+		if(sonarSuccess){
 			// Check if the distance of an object is within the kick-able threshold
 			if(mainSC.getLastSonar() < SoccerGlobals.BALL_SONAR_DIST_GRAB)
 				return true;
@@ -162,9 +202,13 @@ public class Kicker {
 	 *			2.1. The ball is not within a the robot's arm-span (not in between the arms)
 	 *			2.1.1. OR sonar failed
 	 */
-	public boolean ballKickable(){
+	public boolean ballKickable(boolean rePingSensor){
+		boolean sonarSuccess = false;
+		if(rePingSensor){
+			sonarSuccess = mainSC.fetchSonarVal();
+		}
 		// Check if sonar worked and grabbed sonar value
-		if(mainSC.fetchSonarVal()){
+		if(sonarSuccess){
 			// Check if the distance of an object is within the kick-able threshold
 			if(mainSC.getLastSonar() < SoccerGlobals.SONAR_OBJECT_KICKABLE)
 				return true;
@@ -189,15 +233,16 @@ public class Kicker {
 	 *
 	 */
 	public boolean ballInFront(boolean rePingSensors){
+		System.out.println("Ball In Front Test");
 		boolean sonarSuccess = false;
 		boolean irSuccess = false;
 		
 		//************** Re-Ping Sensors if requested **************************//
 		if(rePingSensors){
-			if(!Float.isNaN(mainSC.getLastSonar()))
-				sonarSuccess = mainSC.fetchSonarVal();
-			if(!Float.isNaN(mainSC.getLastModIR()) || !Float.isNaN(mainSC.getLastUnModIR()))
-				irSuccess = mainSC.getAllIrSig();
+			//if(!Float.isNaN(mainSC.getLastSonar()))
+			sonarSuccess = mainSC.fetchSonarVal();
+			//if(!Float.isNaN(mainSC.getLastModIR()) || !Float.isNaN(mainSC.getLastUnModIR()))
+			irSuccess = mainSC.getAllIrSig();
 		}
 		else{
 			sonarSuccess = true;
@@ -287,7 +332,7 @@ public class Kicker {
 				
 				// Only dribble the ball if the robot is moving forward
 				// and the ball is close enough to dribble the ball
-				if((Math.abs(Math.abs(prevHeading)-Math.abs(currHeading)) < 0.05) && (ballKickable())){
+				if((Math.abs(Math.abs(prevHeading)-Math.abs(currHeading)) < 0.05) && (ballKickable(true))){
 					// Setup dribble speeds
 					if(!dribbleReady){
 						System.out.println("Dribble Ready");
@@ -404,11 +449,11 @@ public class Kicker {
 		}
 		else{ // Assumed that the ball is in front at this point -- good to go forward to it
 			mainMC.startMotionForward(10);
-			while((ballInFront(true) && !ballClose())){
+			while((ballInFront(true) && !ballClose(true))){
 				Delay.msDelay(50);
 			}
 			mainMC.stopMotion();
-			if(ballClose()){
+			if(ballClose(true)){
 				System.out.println("Stop Goto -- Ball Close");
 				return true;
 			}
@@ -450,13 +495,13 @@ public class Kicker {
 			}
 			
 			// Check if the ball essentially moved
-			if(!ballInFront || !ballGrabbable || !ballClose()){
+			if(!ballInFront || !ballGrabbable || !ballClose(true)){
 				System.out.println("Ball not in front -- after GOTO");
 				ballInFront = this.turnToBall();
 				ballGrabbable = false;
 			}
 		}
-		
+		System.out.println("END WONDER");
 		return ballGrabbable;
 	}
 	
@@ -515,7 +560,7 @@ public class Kicker {
 			System.out.println("In Goal Range");
 			
 			// Kick the ball to the goal if the robot has the ball 
-			if(ballKickable()){
+			if(ballKickable(true)){
 				kickBall(35,100,40,1000,200,700);
 				goalHitStatus = true;
 				System.out.println("Kicking at Goal");

@@ -1,0 +1,81 @@
+package mop;
+
+import java.io.*;
+import java.util.*;
+import fullSoccer.*;
+import lejos.robotics.navigation.Waypoint;
+import lejos.robotics.RegulatedMotor;
+import lejos.hardware.motor.UnregulatedMotor;
+import lejos.robotics.navigation.Navigator;
+import lejos.hardware.sensor.EV3UltrasonicSensor;
+import lejos.hardware.sensor.HiTechnicCompass;
+import lejos.hardware.sensor.HiTechnicIRSeekerV2;
+import lejos.robotics.SampleProvider;
+import lejos.utility.Delay;
+
+RobotState(Kicker MK) {
+	Kicker currMK;
+	
+	event irModChange after(Kicker MK):
+		cflowbelow(call(public void Kicker.play()) && target(MK))
+		&& set(float SensorControl.ballDirMod)
+		{
+			System.out.println("!!!IR Changed!!!");
+			MK.GetState();
+		}
+	
+	
+	event irUnModChange after(Kicker MK): 
+		cflowbelow(call(public void Kicker.play()) && target(MK))
+		&& set(float SensorControl.ballDirUnMod)
+		{
+			System.out.println("!!!IR Changed!!!");
+			MK.GetState();
+		}
+	
+	
+	event sonarChange after(Kicker MK): 
+		cflowbelow(call(public void Kicker.play()) && target(MK))
+		&& set(float[] SensorControl.distanceSample)
+		{
+			System.out.println("!!!Sonar Changed!!!");
+			MK.GetState();
+		}
+	
+	
+	event irSeekModeModSetup after(Kicker MK): 
+		cflowbelow(call(public void Kicker.play()) && target(MK))
+		&& set(SampleProvider SensorControl.irSeekModeMod)
+		{
+			System.out.println("!!!IR SampleProvider - MOD!!!");
+			MK.GetState();
+		}
+	
+	
+	event irSeekModeUnModSetup after(Kicker MK): 
+		cflowbelow(call(public void Kicker.play()) && target(MK))
+		&& set(SampleProvider SensorControl.irSeekModeUnMod)
+		{
+			System.out.println("!!!IR SampleProvider - UN_MOD!!!");
+			MK.GetState();
+		}
+	
+	
+	//***************MOTOR SETUPS*************************
+	event armSetup after(Kicker MK): 
+		cflowbelow(call(public void Kicker.play()) && target(MK))
+		&& set(UnregulatedMotor MotionControl.arm)
+		{
+			System.out.println("!!!ARM Setup!!!");
+			MK.GetState();
+		}
+	
+	
+	event leftMotorSetup after(Kicker MK): 
+		cflowbelow(call(public void Kicker.play()) && target(MK))
+		&& set(RegulatedMotor MotionControl.leftMotor)
+		{
+			System.out.println("!!!LEFT MOTOR!!!");
+			MK.GetState();
+		}
+}

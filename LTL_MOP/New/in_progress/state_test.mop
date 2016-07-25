@@ -1,0 +1,31 @@
+// From LTL 1 
+// 1. Ball is in front of the robot after goto ball
+
+//package mop;
+
+import java.io.*;
+import java.util.*;
+import fullSoccer.*;
+
+state_test(Kicker MK) {
+	Kicker currMK = null; // Allows for usage of MC in the ltl violation
+	
+	//pointcut playPC12(Kicker MK) : call(public void Kicker.play()) && target(MK);
+	
+	
+	// Handle for the gotoball event
+	event irModChange after(/*Kicker MK*/): /*cflowbelow(call(public void Kicker.play())) && target(MK) &&*/
+		set(float SensorControl.ballDirMod)
+		{
+			//currMK = MK;
+			//System.out.println("Goto Ball EVENT: " + gotoRes);
+		}
+	
+	
+		
+
+
+
+
+}
+

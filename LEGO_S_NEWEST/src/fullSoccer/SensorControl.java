@@ -10,7 +10,7 @@ import lejos.hardware.sensor.HiTechnicIRSeekerV2;
 import lejos.robotics.SampleProvider;
 import lejos.robotics.localization.CompassPoseProvider;
 import lejos.utility.Delay;
-
+import lejos.hardware.DeviceException;
 
 public class SensorControl {
 	
@@ -29,6 +29,9 @@ public class SensorControl {
 	private FileReader simFileReader;
 	private boolean simMode; 
 	
+	EV3UltrasonicSensor sonarSensor = null;	// Actual Sonar sensor
+	HiTechnicIRSeekerV2 irSensor = null;		// Actual IR Seeker
+	
 	
 	/* Base Sensor Control constructor
 	 *	Preconditions: 
@@ -45,14 +48,30 @@ public class SensorControl {
 	 *		3. compass sampler setup
 	 */
 	public SensorControl(Port sonarPort, Port irPort, Port compassPort, boolean simulatorMode){
-		EV3UltrasonicSensor sonarSensor;	// Actual Sonar sensor
-		HiTechnicIRSeekerV2 irSensor;		// Actual IR Seeker
+		
 		
 		simMode = simulatorMode;
-		
+
 		if(!simMode){
-			sonarSensor = new EV3UltrasonicSensor(sonarPort);
-			irSensor = new HiTechnicIRSeekerV2(irPort);
+			try{
+				if(sonarSensor == null && irSensor == null){
+					System.out.println("SEN SETUP");
+					sonarSensor = new EV3UltrasonicSensor(sonarPort);
+					irSensor = new HiTechnicIRSeekerV2(irPort);
+				}
+				else{
+					System.out.println("SensorPorts already in use!");
+				}
+			}
+			catch(DeviceException portError){
+				System.out.println("Sensor ports already setup!");
+				System.out.println("Closing SensorControl Setup");
+				//sonarSensor = new EV3UltrasonicSensor(sonarPort);
+				//irSensor = new HiTechnicIRSeekerV2(irPort);
+				return;
+			}
+			
+
 			distMode = sonarSensor.getDistanceMode();
 			distanceSample = new float[distMode.sampleSize()];
 			irSeekModeMod = irSensor.getModulatedMode();
@@ -63,22 +82,22 @@ public class SensorControl {
 			//compassSP = compassSensor.getCompassMode();
 			
 			//************Compass Calibration************************//
-			System.out.println("Calib Compass? -- UP");
+			/*System.out.println("Calib Compass? -- UP");
 			if(Button.waitForAnyPress() == Button.ID_UP){
 				System.out.println("Start Calib");
 				//compassSensor.startCalibration();
 				Button.waitForAnyPress();
 				//compassSensor.stopCalibration();
 				System.out.println("End Calib");
-			}
+			}*/
 		}
 		else{
-			try {
+			/*try {
 				simFileReader = new FileReader("simData/sensorData.txt");
 			} catch (FileNotFoundException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
-			}
+			}*/
 		}
 	}
 	

@@ -1,0 +1,148 @@
+// MotionControl and SensorControl Init
+// Ensure that everything is ready before play is started
+
+//package mop;
+
+import java.io.*;
+import java.util.*;
+import lejos.hardware.port.SensorPort;
+import lejos.hardware.port.MotorPort;
+import lejos.hardware.port.Port;
+import lejos.robotics.RegulatedMotor;
+import lejos.hardware.DeviceException;
+import fullSoccer.*;
+
+MotorSensorInit(Kicker MK) {
+	Kicker currMK = null; // Allows for usage of MC in the ltl violation
+	boolean playCalled = false;				// Play flag
+	boolean sensorConstructCalled = false;	// sc call flag
+	boolean motionConstructCalled = false;	// mc call flag
+	
+	
+	
+	// Kicker Constructor -- mainSC and mainMC
+	event kickerplay before(Kicker MK):
+		call(public void play())&& target(MK){
+			//currMK = MK;
+			System.out.println("After : Kicker Constructor");
+			playCalled = true;
+		}
+	
+	// SensorControl Constructor -- Port Check
+	event scconstruct before(Kicker MK, Port sonarP, Port irP, Port cp, boolean sim):
+		call(SensorControl.new(Port,Port,Port, boolean))  
+		&& args(sonarP, irP, cp, sim)
+		&& this(MK){
+			currMK = MK;
+			System.out.println("Sensor Port Check:");
+		
+			// Verify that the sonar port passed was correct
+			if(sonarP != SensorPort.S2){
+				System.out.println("Sonar port was: "+ sonarP);
+				sonarP = SensorPort.S2;
+				System.out.println("Sonar port corrected: "+ sonarP);
+			}
+			else{
+				System.out.println("Sonar port correct");
+			}
+			
+			// Verify that the ir port passed was correct
+			if(irP != SensorPort.S3){
+				System.out.println("IR port was: " + irP);
+				irP = SensorPort.S3;
+				System.out.println("IR port corrected: "+irP);
+			}
+			else{
+				System.out.println("IR port correct");
+			}
+			
+			// Verify that the compass port passed was correct
+			if(cp != SensorPort.S4){
+				System.out.println("Compass port was: " + cp);
+				cp = SensorPort.S4;
+				System.out.println("Compass port corrected: "+cp);
+			}
+			else{
+				System.out.println("Compass port correct");
+			}
+			sensorConstructCalled = true;
+		}
+	
+	// MotionControl Constructor -- Port Check
+	event mcconstruct before(Kicker MK,Port lMotorPort,Port rMotorPort,Port armPort, boolean sim):
+		call(MotionControl.new(Port,Port,Port, boolean)) 
+		&& args (lMotorPort, rMotorPort,armPort, sim)
+		&& this(MK){
+			currMK = MK;
+			
+			System.out.println("Motor Port Check:");
+		
+			// Verify that the left motor port passed was correct
+			if(lMotorPort != MotorPort.A){
+				System.out.println("Left motor port was: "+ lMotorPort);
+				lMotorPort = MotorPort.A;
+				System.out.println("Left motor port corrected: "+ lMotorPort);
+			}
+			else{
+				System.out.println("Left motor port correct");
+			}
+			
+			// Verify that the right motor port passed was correct
+			if(rMotorPort != MotorPort.D){
+				System.out.println("Right motor port was: "+ rMotorPort);
+				rMotorPort = MotorPort.D;
+				System.out.println("Right motor port corrected: "+ rMotorPort);
+			}
+			else{
+				System.out.println("Right motor port correct");
+			}
+			
+			// Verify that the arm motor port passed was correct
+			if(armPort != MotorPort.C){
+				System.out.println("Arm motor port was: "+ armPort);
+				armPort = MotorPort.C;
+				System.out.println("Arm motor port corrected: "+ armPort);
+			}
+			else{
+				System.out.println("Arm motor port correct");
+			}
+			motionConstructCalled = true;
+		}
+	
+	/*event portreused after(DeviceException portError):
+		handler(DeviceException) && args(portError){
+			System.out.println("Port Re-Use Caught!");
+		}*/
+	
+
+	//ltl: [](kickerplay => (<*> scconstruct and <*> mcconstruct and [](not portreused)))
+	ltl: [](kickerplay => <*> scconstruct and <*> mcconstruct) // Worked
+	//ltl: []((scconstruct and mcconstruct) U kickerplay)
+	@violation {
+		System.out.println("!!!Motor/Sensor Init LTL FAIL!!!");
+		
+		// Setup the MotionControl if needed
+		if(!motionConstructCalled){
+			System.out.println("!!!MotionControl Setup -- In LTL!!!");
+			currMK.setMotionControl(new MotionControl(MotorPort.A, MotorPort.D, MotorPort.C,false));
+			System.out.println("!!!MotionControl Setup -- SUCCESS!!!");
+		}
+		else{
+			System.out.println("!!!MotionControl Already Setup!!!");
+		}
+		
+		// Setup the SensorControl if needed
+		if(!sensorConstructCalled){
+			System.out.println("!!!SensorControl Setup -- In LTL!!!");
+			currMK.setSensorControl(new SensorControl(SensorPort.S2, SensorPort.S3, SensorPort.S4,false));
+			System.out.println("!!!SensorControl Setup -- SUCCESS!!!");
+		}
+		else{
+			System.out.println("!!!MotionControl Already Setup!!!");
+		}
+		
+		__RESET;	// This is supposed to reset the monitor
+	}
+
+}
+

@@ -1,6 +1,9 @@
 package fullSoccer;
+import lejos.hardware.DeviceException;
+import lejos.hardware.motor.EV3LargeRegulatedMotor;
 import lejos.hardware.motor.UnregulatedMotor;
 import lejos.hardware.port.MotorPort;
+import lejos.hardware.port.Port;
 //import lejos.robotics.DirectionFinder;
 //import lejos.robotics.DirectionFinderAdapter;
 import lejos.robotics.RegulatedMotor;
@@ -18,12 +21,12 @@ import lejos.utility.Delay;
 public class MotionControl {
 	private MovePilot movePilot;			// handles base properties for the navigator
 	public Navigator roboMotor;				// Grid navigation handler
-	private UnregulatedMotor arm;			// robot kicking arm
 	PoseProvider posProv;					// provides the robot's position in waypoint terms
 	MoveController baseMC;					// direct motor control -- NOTE: MAY BE REMOVED
 	//private CompassPoseProvider compassProv;// compass
 	private RegulatedMotor leftMotor;
 	private RegulatedMotor rightMotor;
+	private UnregulatedMotor arm;			// robot kicking arm
 	
 	public enum Dir  {FORWARD,BACKWARD};
 	
@@ -36,14 +39,30 @@ public class MotionControl {
 	 *		1. Navigator initialized with the correct dimentions
 	 *		2. Position provider initialized
 	 */
-	public MotionControl(RegulatedMotor leftMotor, RegulatedMotor rightMotor, boolean simEnabled){
+	public MotionControl(Port lMotorPort, Port rMotorPort,Port armPort, boolean simEnabled){
 		// !!!NOTE: DIMS MAY BE WRONG FOR WHEEL!!!
 		//float wheelDiam = 3.348;
 		if(!simEnabled){
 			float wheelDiam = (float) /*3.3*/4.746;
 			float trackWidth = (float) 6.6 /*7.6*/;
-			this.leftMotor = leftMotor;
-			this.rightMotor = rightMotor;
+			
+			try{
+				if(leftMotor == null && rightMotor == null && arm == null){
+					leftMotor = new EV3LargeRegulatedMotor(lMotorPort);
+					rightMotor = new EV3LargeRegulatedMotor(rMotorPort);
+					arm = new UnregulatedMotor(armPort);
+				}
+				else{
+					System.out.println("MotionControl ports already in use!");
+				}
+			}
+			catch(DeviceException portError){
+				System.out.println("Motion ports already setup!");
+				System.out.println("Closing MotionControl Setup");
+				return;
+			}
+			
+			
 			
 			Wheel wheel1 = WheeledChassis.modelWheel(leftMotor, wheelDiam).offset(-1*trackWidth);
 			Wheel wheel2 = WheeledChassis.modelWheel(rightMotor, wheelDiam /*1.62*/).offset(trackWidth);
@@ -55,7 +74,7 @@ public class MotionControl {
 			
 			//compassProv = new CompassPoseProvider(movePilot,df);
 			//roboMotor.setPoseProvider(compassProv);
-			arm = new UnregulatedMotor(MotorPort.C);
+			
 			posProv = roboMotor.getPoseProvider();
 			
 			baseMC = roboMotor.getMoveController();
