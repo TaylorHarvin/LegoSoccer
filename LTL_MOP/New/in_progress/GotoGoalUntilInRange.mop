@@ -13,6 +13,7 @@ GotoGoalUntilInRange(Kicker MK,MotionControl MC) {
 	boolean isGotoGoal = false;
 	boolean goalRangeFlag = true;
 	MotionControl currMC;
+	Kicker currMK;
 	boolean ballInFrontFlag = false;
 	
 	/*event gotogoal after(Waypoint dest, boolean withBall,MotionControl MC) returning (boolean gotoRes) :
@@ -30,13 +31,13 @@ GotoGoalUntilInRange(Kicker MK,MotionControl MC) {
 			//MC.GotoWaypoint(new Waypoint(1,1),false);
 		}*/	
 
-	event gotogoal before(boolean withBall,Kicker MK):
-		call(public boolean GotoGoal(boolean)) && args(withBall)&& target(MK){
+	/*event gotogoal before(boolean withBall,Kicker MK):
+		call(public boolean gotoGoal(boolean)) && args(withBall)&& target(MK){
 			System.out.println("Goto Goal Event");
 			currMC = MK.GetMotionControl();
 			isGotoGoal = withBall;
 			//MC.GotoWaypoint(new Waypoint(1,1),false);
-		}	
+		}	*/
 		
 	event generalGoto after(Waypoint dest):
 		call(public void goTo(Waypoint)) && args(dest){
@@ -49,23 +50,42 @@ GotoGoalUntilInRange(Kicker MK,MotionControl MC) {
 		}	
 	
 		
-	event ingoalrange after(MotionControl MC) returning (boolean res):
-		call(public boolean InGoalRange()) && condition(res) && this(MC){
+	event ingoalrange_true after(MotionControl MC) returning (boolean inRange):
+		call(public boolean inGoalRange()) && condition(inRange) && this(MC){
 			currMC = MC;
-			System.out.println("Goal Range Check: "+res);
+			System.out.println("Goal Range Check: "+inRange);
 		}
 		
-	event robotmoving after(MotionControl MC) returning (boolean res):
-		call(public boolean RobotMoving()) && condition(res) && this(MC){
+	event ingoalrange_false after(MotionControl MC) returning (boolean inRange):
+		call(public boolean inGoalRange()) && condition(inRange) && this(MC){
 			currMC = MC;
-			System.out.println("Movement Check: "+res);
+			System.out.println("Goal Range Check: "+inRange);
+		}
+		
+	event robotmoving_true after(MotionControl MC) returning (boolean moving):
+		call(public boolean robotMoving()) && condition(moving) && this(MC){
+			currMC = MC;
+			System.out.println("Movement Check TRUE: "+moving);
+		}
+		
+	event robotmoving_false after(MotionControl MC) returning (boolean moving):
+		call(public boolean robotMoving()) && condition(!moving) && this(MC){
+			currMC = MC;
+			System.out.println("Movement Check FALSE: "+moving);
 		}
 	
 	
-	event ballinfront after(MotionControl MC) returning (boolean ballinfrontRes):
-		call(public boolean BallInFront()) && condition(ballinfrontRes) && this(MC){
-			currMC = MC;
-			System.out.println("Ball in front: "+ballinfrontRes);
+	event ballinfront_true after(Kicker MK) returning (boolean ballinfrontRes):
+		call(public boolean ballInFront()) && condition(ballinfrontRes) && this(MK){
+			currMK = MK;
+			System.out.println("Ball in front TRUE: "+ballinfrontRes);
+			ballInFrontFlag = ballinfrontRes;
+		}
+		
+	event ballinfront_false after(Kicker MK) returning (boolean ballinfrontRes):
+		call(public boolean ballInFront()) && condition(!ballinfrontRes) && this(MK){
+			currMK = MK;
+			System.out.println("Ball in front FALSE: "+ballinfrontRes);
 			ballInFrontFlag = ballinfrontRes;
 		}
 	
@@ -73,7 +93,7 @@ GotoGoalUntilInRange(Kicker MK,MotionControl MC) {
 	// When going to goal starts, keep going until 
 	// it is in range of the goal or it looses the ball
 	//ltl: []((gotogoal) => (robotmoving U ingoalrange))
-	ltl: [](generalGoto => (robotmoving U ingoalrange))
+	ltl: [](generalGoto => (robotmoving_true U ingoalrange_true))
 	
 	///ltl: []((gotogoal) => (<> robotmoving and (robotmoving U (not ballinfront or ingoalrange))))
 	//ltl: [](ballinfront)

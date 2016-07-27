@@ -25,7 +25,7 @@ public class Kicker {
 	 *	1. The ball has been kicked to the goal
 	 */
 	public void play(){
-		boolean ballKickedToGoal = false;
+		/*boolean ballKickedToGoal = false;
 		//Wonder();
 		while(!ballKickedToGoal){
 			// The ball was found, bring it to the goal
@@ -41,7 +41,7 @@ public class Kicker {
 		}
 		//System.out.println("Goal Shot: " + GotoGoal(true));
 		//mainMC.DribbleBall();
-		System.out.println(getBallDirection());
+		System.out.println(getBallDirection());*/
 		
 		
 		//!!!TESTING!!!
@@ -70,6 +70,12 @@ public class Kicker {
 			// Goto LTL test -- stop calling goto after the ball is already in reach
 			/*while(true)
 				this.gotoBall();*/
+			// BIF TEST
+			mainSC.getAllIrSig();
+			// Goto Goal after successful wonder
+				/*wonder();
+				kickBall(20, 100, 20, 100, 200, 1000);
+				gotoGoal(true);*/
 	}
 	
 	
@@ -518,6 +524,7 @@ public class Kicker {
 	 *		2. Original motor speeds and power are reset back the original
 	 */
 	public void kickBall(int oldArmPower,int newArmPower, int oldRobotSpeed,int newRobotSpeed, int armDelay, int forwardDelay){
+		System.out.println("Kicking");
 		mainMC.setArmPower(newArmPower);
 		mainMC.setLinearSpeed(newRobotSpeed);
 		mainMC.setAngularSpeed(newRobotSpeed);

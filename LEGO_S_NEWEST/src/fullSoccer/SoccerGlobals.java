@@ -12,3 +12,4 @@ public class SoccerGlobals {
 	public static double GOAL_RANGE_THRESHOLD = 40;				// Kickable diameter to the goal
 	public static double BALL_SONAR_DIST_GRAB = (float) 0.08;	// Sonar value threshold for grabbing the ball
 }
+ 

@@ -133,7 +133,7 @@ aspect RoboStateMachine{
 			return State.INIT;
 	}
 	
-	/*pointcut playPC(Kicker MK) : call(public void Kicker.play()) && target(MK);
+	pointcut playPC(Kicker MK) : call(public void Kicker.play()) && target(MK);
 	pointcut getBallDirectionPC(Kicker MK) : call(public void Kicker.getBallDirection()) && target(MK);
 	pointcut ballClosePC(Kicker MK) : call(public void Kicker.ballClose(boolean)) && target(MK);
 	pointcut ballKickablePC(Kicker MK) : call(public void Kicker.ballKickable(boolean)) && target(MK);
@@ -142,9 +142,9 @@ aspect RoboStateMachine{
 	pointcut turnToBallPC(Kicker MK) : call(public void Kicker.turnToBall()) && target(MK);
 	pointcut gotoBallPC(Kicker MK) : call(public void Kicker.gotoBall()) && target(MK);
 	pointcut wonderPC(Kicker MK) : call(public void Kicker.wonder()) && target(MK);
-	*/
+	
 	// IR -- Mod 
-	/*pointcut irModChange(Kicker MK) : cflowbelow(playPC(MK)) && set(float SensorControl.ballDirMod);
+	pointcut irModChange(Kicker MK) : cflowbelow(playPC(MK)) && set(float SensorControl.ballDirMod);
 	after(Kicker MK):irModChange(MK){
 		System.out.println("!!!IR Changed!!!");
 		MK.GetState();
@@ -165,7 +165,7 @@ aspect RoboStateMachine{
 	after(Kicker MK):sonarChange(MK){
 		System.out.println("!!!Sonar Changed!!!");
 		MK.GetState();
-	}*/
+	}
 	
 	
 	//***************SENSOR SETUPS************************
@@ -176,7 +176,7 @@ aspect RoboStateMachine{
 	
 	
 	// IR sensor setup
-	/*pointcut irSensorSetup(Kicker MK): cflowbelow(playPC(MK)) && set(HiTechnicIRSeekerV2 SensorControl.irSensor);
+	//pointcut irSensorSetup(Kicker MK): cflowbelow(playPC(MK)) && set(HiTechnicIRSeekerV2 SensorControl.irSensor);
 	//after(Kicker MK):irSensorSetup(MK){}
 	
 	
@@ -184,7 +184,7 @@ aspect RoboStateMachine{
 	//pointcut compassSensorSetup(Kicker MK): cflowbelow(playPC(MK)) && set(HiTechnicCompass SensorControl.compassSensor);
 	//after(Kicker MK):compassSensorSetup(MK){
 		
-	//}*/
+	//}
 	
 	
 	
@@ -192,7 +192,7 @@ aspect RoboStateMachine{
 	
 	
 	// IR Mod sampler
-	/*pointcut irSeekModeModSetup(Kicker MK):cflowbelow(playPC(MK)) && set(SampleProvider SensorControl.irSeekModeMod);
+	pointcut irSeekModeModSetup(Kicker MK):cflowbelow(playPC(MK)) && set(SampleProvider SensorControl.irSeekModeMod);
 	after(Kicker MK):irSeekModeModSetup(MK){
 		System.out.println("!!!IR SampleProvider - MOD!!!");
 		MK.GetState();
@@ -205,7 +205,7 @@ aspect RoboStateMachine{
 	after(Kicker MK):irSeekModeUnModSetup(MK){
 		System.out.println("!!!IR SampleProvider - UN_MOD!!!");
 		MK.GetState();
-	}*/
+	}
 	
 	
 	
@@ -218,7 +218,7 @@ aspect RoboStateMachine{
 	
 	//***************MOTOR SETUPS*************************
 	// Arm setup
-	/*pointcut armSetup(Kicker MK):cflowbelow(playPC(MK)) && set(UnregulatedMotor MotionControl.arm);
+	pointcut armSetup(Kicker MK):cflowbelow(playPC(MK)) && set(UnregulatedMotor MotionControl.arm);
 	after(Kicker MK):armSetup(MK){
 		System.out.println("!!!ARM Setup!!!");
 		MK.GetState();
@@ -249,7 +249,7 @@ aspect RoboStateMachine{
 	after(Kicker MK):roboMotorSetup(MK){
 		System.out.println("!!!ROBO MOTOR!!!");
 		MK.GetState();
-	}*/
+	}
 	
 	
 	

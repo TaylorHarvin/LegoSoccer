@@ -166,19 +166,29 @@ public class SensorControl {
 	 *			1.1.1. OR valid Un-Mod IR read
 	 *			1.2. Ball heading in relation to robot returned for requested mode
 	 */
-	public float fetchAngleVal(boolean modulated){
+	public boolean fetchAngleVal(boolean modulated){
 		if(!simMode){
-			if(modulated)
+			if(modulated){
 				irSeekModeMod.fetchSample(irSample, 0);
-			else
+				ballDirMod = irSample[0];
+			}
+			else{
 				irSeekModeUnMod.fetchSample(irSample, 0);
+				ballDirUnMod = irSample[0];
+			}
 			//System.out.println(irSample[0]);
 			Delay.msDelay(50);
 		}
 		else{
 			
 		}
-		return irSample[0];
+		if(!Float.isNaN(irSample[0])){
+			return true;
+		}
+		else
+			return false;
+		
+		//return irSample[0];
 	}
 	
 	
@@ -201,8 +211,8 @@ public class SensorControl {
 	 *			2.1.1. OR The robot's batteries are low.
 	 */
 	public boolean getAllIrSig(){
-		ballDirMod = fetchAngleVal(true);
-		ballDirUnMod = fetchAngleVal(false);
+		fetchAngleVal(true);
+		fetchAngleVal(false);
 		// Verify that an IR signal is read -- this should be at all times
 		if(!Float.isNaN(ballDirMod) || !Float.isNaN(ballDirUnMod))
 			return true;

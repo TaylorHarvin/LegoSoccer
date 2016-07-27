@@ -16,14 +16,21 @@ TurnToGoalAfterGoto(Kicker MK) {
 	
 	// Goto goal event (right before it is called) -- called directly in Kicker
 	event gotogoal before(Kicker MK):
-		call(public boolean GotoGoal(boolean))&& target(MK){
+		call(public boolean gotoGoal(boolean))&& this(MK){
 			System.out.println("GotoGoal EVENT");
 		}
 	
 	// Wonder event (after it is called) -- called directly in Kicker
-	event wonder after(Kicker MK) returning (boolean res):
-		call(public boolean Wonder())&& this(MK){
-			System.out.println("Wonder status: "+ res);
+	event wonder_success after(Kicker MK) returning (boolean wonderRes):
+		call(public boolean wonder())&& condition(wonderRes) && this(MK){
+			System.out.println("Wonder success: "+ wonderRes);
+			currMK = MK;
+		}
+		
+	// Wonder event (after it is called) -- called directly in Kicker
+	event wonder_fail after(Kicker MK) returning (boolean wonderRes):
+		call(public boolean wonder())&& condition(!wonderRes) && this(MK){
+			System.out.println("Wonder fail: "+ wonderRes);
 			currMK = MK;
 		}
 
@@ -31,14 +38,12 @@ TurnToGoalAfterGoto(Kicker MK) {
 	//		 naturally in our basic setup, but a triggerLTLViolation flag
 	//		 can be set to true to bypass GotoGoal(..), which will simulate the violation
 	//		 and allow for handling below
-	//ltl: [](wonder => (*) gotogoal)
-	ltl: [](wonder => (o gotogoal))
+	//ltl: [](wonder_success => gotogoal)
+	ltl: [](wonder_success => o gotogoal)
 	@violation {
-		//Kicker MK = new Kicker();
-		//_MONITOR.currMK.GotoGoal(true);
-		System.err.println("!!!GOTO_GOAL LTL FAIL!!!");
-		System.err.println("Applying Recovery Goto");
-		currMK.GotoGoal(true);
+		System.out.println("!!!GOTO_GOAL LTL FAIL!!!");
+		System.out.println("Applying Recovery Goto");
+		currMK.gotoGoal(true);
 		__RESET;
 	}
 

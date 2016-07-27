@@ -15,21 +15,34 @@ import lejos.hardware.sensor.HiTechnicIRSeekerV2;
 import lejos.robotics.SampleProvider;
 
 aspect RoboStateMachine{
+	// State status options
 	public enum State {
 		INIT, WONDER, GOTO_BALL, TURN_TO_GOAL, DRIBBLE_TO_GOAL,
 		KICK_BALL_TO_GOAL, GAME_OVER
 	}
 	
+	public enum ChangedEvent {
+		NONE, IR_MOD, IR_UNMOD,SONAR,
+	}
+	
+	
+	boolean sonarSuccess = false;
+	boolean modIrSuccess = false;
+	boolean unModIrSuccess = false;
+	
+	float irModRead = -1;
+	float irUnModRead = -1;
+	float sonarRead = -1;
+	
+	boolean inGoalRange = false;
+	boolean ballInFront = false;
+	boolean ballClose = false;
+	boolean robotMoving = false;
+	boolean robotTurning = false;
 	
 	
 	// NOTE: Returning true => that the robot should be in this state
 	public boolean Kicker.WonderState(){
-		//boolean successfulIrRead = getSensorControl().getAllIrSig();
-		//successfulSonarRead = getSensorControl().fetchSonarVal();
-		boolean ballClose = ballClose(false);
-		float irModRead = getSensorControl().getLastModIR();
-		float irUnModRead = getSensorControl().getLastUnModIR();
-		
 		if(!Float.isNaN(irModRead) || !Float.isNaN(irUnModRead)){
 			if(irModRead == 0 || irUnModRead == 0)
 				return false;
@@ -47,14 +60,6 @@ aspect RoboStateMachine{
 	
 	// Going to ball state
 	public boolean Kicker.GotoBallState(){
-		boolean robotMoving = getMotionControl().robotMoving();
-		boolean ballInFront = ballInFront(false);
-		boolean ballClose = ballClose(false);
-		
-		float irModRead = getSensorControl().getLastModIR();
-		float irUnModRead = getSensorControl().getLastUnModIR();
-		float sonarRead = getSensorControl().getLastSonar();
-		
 		// Check if the robot should remain in the goto ball state
 		if(ballInFront && robotMoving && !ballClose)
 			return true;
@@ -64,15 +69,6 @@ aspect RoboStateMachine{
 	
 	// Turning to goal state
 	public boolean Kicker.TurnToGoalState(){
-		boolean robotMoving = getMotionControl().robotMoving();
-		boolean robotTurning = getMotionControl().robotTurning();
-		boolean ballInFront = ballInFront(false);
-		boolean ballClose = ballClose(false);
-		
-		float irModRead = getSensorControl().getLastModIR();
-		float irUnModRead = getSensorControl().getLastUnModIR();
-		float sonarRead = getSensorControl().getLastSonar();
-		
 		// Ball should remain in front of the robot while turning
 		// NOTE: Need turning check
 		if(ballInFront && ballClose && robotTurning)
@@ -83,14 +79,6 @@ aspect RoboStateMachine{
 	
 	
 	public boolean Kicker.DribbleBallState(){
-		boolean inGoalRange = getMotionControl().inGoalRange();
-		boolean ballInFront = ballInFront(false);
-		boolean ballClose = ballClose(false);
-		
-		float irModRead = getSensorControl().getLastModIR();
-		float irUnModRead = getSensorControl().getLastUnModIR();
-		float sonarRead = getSensorControl().getLastSonar();
-		
 		// Ball should be near and in front robot while moving to goal
 		if(!inGoalRange && ballInFront && ballClose)
 			return true;
@@ -101,26 +89,39 @@ aspect RoboStateMachine{
 	
 	// Kick state
 	public boolean Kicker.KickBallAtGoal(){
-		boolean inGoalRange = getMotionControl().inGoalRange();
-		boolean ballInFront = ballInFront(false);
-		boolean ballClose = ballClose(false);
-		
-		float irModRead = getSensorControl().getLastModIR();
-		float irUnModRead = getSensorControl().getLastUnModIR();
-		float sonarRead = getSensorControl().getLastSonar();
-		
 		// Ball should be with the robot and in the goal range until kick
 		if(inGoalRange && ballInFront && ballClose)
 			return true;
 		else
 			return false;
-		
 	}
 	
 	
 	// Get the state of the robot
 	// NOTE: This may be the incorrect way of doing this -- depending on what is needed
-	public State Kicker.GetState(){
+	public State Kicker.GetState(ChangeEvent currEvent){
+	
+		
+		
+		// Ping the sensors that were not pinged in the event
+		if(currEvent != ChangeEvent.SONAR)
+			sonarSuccess = getSensorControl().fetchSonarVal();
+		if(currEvent != ChangeEvent.IR_MOD)
+			modIrSuccess = getSensorControl().fetchAngleVal(true);
+		if(currEvent != ChangeEvent.IR_UNMOD)
+			unModIrSuccess = getSensorControl().fetchAngleVal(true);
+		
+		irModRead = getSensorControl().getLastModIR();
+		irUnModRead = getSensorControl().getLastUnModIR();
+		
+		inGoalRange = getMotionControl().inGoalRange();
+		ballInFront = ballInFront(false);
+		ballClose = ballClose(false);
+		robotMoving = getMotionControl().robotMoving();
+		sonarRead = getSensorControl().getLastSonar();
+		robotTurning = getMotionControl().robotTurning();
+		
+		
 		if(this.WonderState())
 			return State.WONDER;
 		else if(this.GotoBallState())
@@ -132,6 +133,28 @@ aspect RoboStateMachine{
 		else
 			return State.INIT;
 	}
+	
+	// Print the current state of the robot
+	public State Kicker.PrintState(State currState){
+		switch(currState){
+			case State.WONDER:
+				System.out.println("In -WONDER- State");
+				break;
+			case State.GOTO_BALL:
+				System.out.println("In -GOTO_BALL- State");
+				break;
+			case State.DRIBBLE_TO_GOAL:
+				System.out.println("In -DRIBBLE_TO_GOAL- State");
+				break;
+			case KICK_BALL_TO_GOAL:
+				System.out.println("In -KICK_BALL_TO_GOAL- State");
+				break;
+			default:
+				System.out.println("UNDEFINED STATE");
+				break;
+		}
+	}
+	
 	
 	pointcut playPC(Kicker MK) : call(public void Kicker.play()) && target(MK);
 	pointcut getBallDirectionPC(Kicker MK) : call(public void Kicker.getBallDirection()) && target(MK);
@@ -146,8 +169,8 @@ aspect RoboStateMachine{
 	// IR -- Mod 
 	pointcut irModChange(Kicker MK) : cflowbelow(playPC(MK)) && set(float SensorControl.ballDirMod);
 	after(Kicker MK):irModChange(MK){
-		System.out.println("!!!IR Changed!!!");
-		MK.GetState();
+		System.out.println("!!!IR MOD Changed!!!");
+		MK.PrintState(MK.GetState(MK.ChangeEvent.IR_MOD));
 		//MK.WonderState();
 		//MK.ballInFront(false);
 	}
@@ -156,15 +179,15 @@ aspect RoboStateMachine{
 	// IR -- UnMod
 	pointcut irUnModChange(Kicker MK) :cflowbelow(getBallDirectionPC(MK)) && set(float SensorControl.ballDirUnMod);
 	after(Kicker MK):irUnModChange(MK){
-		System.out.println("!!!IR Changed!!!");
-		MK.GetState();
+		System.out.println("!!!IR UN-MOD Changed!!!");
+		MK.PrintState(MK.GetState(MK.ChangeEvent.IR_UNMOD));
 	}
 	
 	// Sonar
 	pointcut sonarChange(Kicker MK) : cflowbelow(ballClosePC(MK)) && set(float[] SensorControl.distanceSample);
 	after(Kicker MK):sonarChange(MK){
 		System.out.println("!!!Sonar Changed!!!");
-		MK.GetState();
+		MK.PrintState(MK.GetState(MK.ChangeEvent.SONAR));
 	}
 	
 	
@@ -176,7 +199,7 @@ aspect RoboStateMachine{
 	
 	
 	// IR sensor setup
-	/*pointcut irSensorSetup(Kicker MK): cflowbelow(playPC(MK)) && set(HiTechnicIRSeekerV2 SensorControl.irSensor);
+	//pointcut irSensorSetup(Kicker MK): cflowbelow(playPC(MK)) && set(HiTechnicIRSeekerV2 SensorControl.irSensor);
 	//after(Kicker MK):irSensorSetup(MK){}
 	
 	
@@ -184,7 +207,7 @@ aspect RoboStateMachine{
 	//pointcut compassSensorSetup(Kicker MK): cflowbelow(playPC(MK)) && set(HiTechnicCompass SensorControl.compassSensor);
 	//after(Kicker MK):compassSensorSetup(MK){
 		
-	//}*/
+	//}
 	
 	
 	
@@ -195,7 +218,7 @@ aspect RoboStateMachine{
 	pointcut irSeekModeModSetup(Kicker MK):cflowbelow(playPC(MK)) && set(SampleProvider SensorControl.irSeekModeMod);
 	after(Kicker MK):irSeekModeModSetup(MK){
 		System.out.println("!!!IR SampleProvider - MOD!!!");
-		MK.GetState();
+		//PrintState(MK.GetState());
 	}
 	
 	
@@ -204,7 +227,7 @@ aspect RoboStateMachine{
 	pointcut irSeekModeUnModSetup(Kicker MK):cflowbelow(playPC(MK)) && set(SampleProvider SensorControl.irSeekModeUnMod);
 	after(Kicker MK):irSeekModeUnModSetup(MK){
 		System.out.println("!!!IR SampleProvider - UN_MOD!!!");
-		MK.GetState();
+		//PrintState(MK.GetState());
 	}
 	
 	
@@ -221,7 +244,7 @@ aspect RoboStateMachine{
 	pointcut armSetup(Kicker MK):cflowbelow(playPC(MK)) && set(UnregulatedMotor MotionControl.arm);
 	after(Kicker MK):armSetup(MK){
 		System.out.println("!!!ARM Setup!!!");
-		MK.GetState();
+		//PrintState(MK.GetState());
 	}
 	
 	
@@ -230,7 +253,7 @@ aspect RoboStateMachine{
 	pointcut leftMotorSetup(Kicker MK):cflowbelow(playPC(MK)) && set(RegulatedMotor MotionControl.leftMotor);
 	after(Kicker MK):leftMotorSetup(MK){
 		System.out.println("!!!LEFT MOTOR!!!");
-		MK.GetState();
+		//PrintState(MK.GetState());
 	}
 	
 	
@@ -239,7 +262,7 @@ aspect RoboStateMachine{
 	pointcut rightMotorSetup(Kicker MK):cflowbelow(playPC(MK)) && set(RegulatedMotor MotionControl.rightMotor);
 	after(Kicker MK):rightMotorSetup(MK){
 		System.out.println("!!!RIGHT MOTOR!!!");
-		MK.GetState();
+		//PrintState(MK.GetState());
 	}
 	
 	
@@ -248,7 +271,7 @@ aspect RoboStateMachine{
 	pointcut roboMotorSetup(Kicker MK):cflowbelow(playPC(MK)) && set(Navigator MotionControl.roboMotor);
 	after(Kicker MK):roboMotorSetup(MK){
 		System.out.println("!!!ROBO MOTOR!!!");
-		MK.GetState();
+		//PrintState(MK.GetState());
 	}
 	
 	
