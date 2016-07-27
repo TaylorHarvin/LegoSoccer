@@ -54,7 +54,7 @@ HasBallAtKick(Kicker MK) {
 		
 		
 		
-	ltl: [](kicking <=> (ballkickable_true and ballinfront_true))
+	ltl: [](kicking => (*)(ballkickable_true or ballinfront_true))
 	@violation {
 		//sonarVal = currMC.mainSC.fetchSonarVal();
 		

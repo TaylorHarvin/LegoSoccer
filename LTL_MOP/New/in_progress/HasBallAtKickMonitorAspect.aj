@@ -144,11 +144,11 @@ class HasBallAtKickMonitor extends com.runtimeverification.rvmonitor.java.rt.tab
 
 	Kicker currMK = null;
 
-	static final int Prop_1_transition_kicking[] = {1, 2, 2};;
-	static final int Prop_1_transition_ballkickable_true[] = {0, 2, 2};;
-	static final int Prop_1_transition_ballkickable_false[] = {0, 2, 2};;
-	static final int Prop_1_transition_ballinfront_true[] = {0, 2, 2};;
-	static final int Prop_1_transition_ballinfront_false[] = {0, 2, 2};;
+	static final int Prop_1_transition_kicking[] = {2, 0, 3, 3};;
+	static final int Prop_1_transition_ballkickable_true[] = {1, 1, 3, 3};;
+	static final int Prop_1_transition_ballkickable_false[] = {0, 0, 3, 3};;
+	static final int Prop_1_transition_ballinfront_true[] = {1, 1, 3, 3};;
+	static final int Prop_1_transition_ballinfront_false[] = {0, 0, 3, 3};;
 
 	volatile boolean Prop_1_Category_violation = false;
 
@@ -196,7 +196,7 @@ class HasBallAtKickMonitor extends com.runtimeverification.rvmonitor.java.rt.tab
 		}
 
 		int nextstate = this.handleEvent(0, Prop_1_transition_kicking) ;
-		this.Prop_1_Category_violation = nextstate == 1;
+		this.Prop_1_Category_violation = nextstate == 2;
 
 		return true;
 	}
@@ -213,7 +213,7 @@ class HasBallAtKickMonitor extends com.runtimeverification.rvmonitor.java.rt.tab
 		}
 
 		int nextstate = this.handleEvent(1, Prop_1_transition_ballkickable_true) ;
-		this.Prop_1_Category_violation = nextstate == 1;
+		this.Prop_1_Category_violation = nextstate == 2;
 
 		return true;
 	}
@@ -230,7 +230,7 @@ class HasBallAtKickMonitor extends com.runtimeverification.rvmonitor.java.rt.tab
 		}
 
 		int nextstate = this.handleEvent(2, Prop_1_transition_ballkickable_false) ;
-		this.Prop_1_Category_violation = nextstate == 1;
+		this.Prop_1_Category_violation = nextstate == 2;
 
 		return true;
 	}
@@ -247,7 +247,7 @@ class HasBallAtKickMonitor extends com.runtimeverification.rvmonitor.java.rt.tab
 		}
 
 		int nextstate = this.handleEvent(3, Prop_1_transition_ballinfront_true) ;
-		this.Prop_1_Category_violation = nextstate == 1;
+		this.Prop_1_Category_violation = nextstate == 2;
 
 		return true;
 	}
@@ -264,7 +264,7 @@ class HasBallAtKickMonitor extends com.runtimeverification.rvmonitor.java.rt.tab
 		}
 
 		int nextstate = this.handleEvent(4, Prop_1_transition_ballinfront_false) ;
-		this.Prop_1_Category_violation = nextstate == 1;
+		this.Prop_1_Category_violation = nextstate == 2;
 
 		return true;
 	}
@@ -311,7 +311,13 @@ class HasBallAtKickMonitor extends com.runtimeverification.rvmonitor.java.rt.tab
 			return;
 			case 0:
 			//kicking
-			return;
+			//alive_MK
+			if(!(alive_parameters_0)){
+				RVM_terminated = true;
+				return;
+			}
+			break;
+
 			case 1:
 			//ballkickable_true
 			//alive_MK
@@ -357,7 +363,7 @@ class HasBallAtKickMonitor extends com.runtimeverification.rvmonitor.java.rt.tab
 	}
 
 	public static int getNumberOfStates() {
-		return 3;
+		return 4;
 	}
 
 }
