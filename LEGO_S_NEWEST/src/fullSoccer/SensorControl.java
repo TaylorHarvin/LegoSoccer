@@ -119,6 +119,24 @@ public class SensorControl {
 	}
 	
 	
+	public float pingSonar(){
+		float tmpDist[] = new float[2];
+		distMode.fetchSample(tmpDist, 0);
+		Delay.msDelay(50);
+		return tmpDist[0];
+	}
+	
+	public float pingIr(boolean modulated){
+		float tmpIr[] = new float[2];
+		if(modulated){
+			irSeekModeMod.fetchSample(tmpIr, 0);
+		}
+		else{
+			irSeekModeUnMod.fetchSample(tmpIr, 0);
+		}
+		Delay.msDelay(50);
+		return tmpIr[0];
+	}
 	
 	
 	

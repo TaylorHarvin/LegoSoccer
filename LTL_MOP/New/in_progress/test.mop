@@ -1,0 +1,103 @@
+// Base State LTL
+// Events pulled from the StateCheck class in collaboration with RoboStateMachine.aj
+// Also based directly off of the state diagram to ensure proper transitions
+// from state to state
+
+
+//package mop;
+
+import java.io.*;
+import java.util.*;
+import fullSoccer.*;
+import stateTools.*;
+
+test(Kicker MK) {
+	StateCheck BC = new StateCheck();		// State check tools 
+	Kicker currMK;	// Reference to kicker for the ltl violation
+	
+	// Base event for the state test -- returns final (actual) current state
+	event statechange after(ChangeEvent CE, Kicker MK):
+		call(public State StateCheck.GetState(ChangeEvent, Kicker)) && args(CE, MK){
+			System.out.println("TEST EVENT");
+			BC.PrintState(BC.GetState(ChangeEvent.SONAR,MK));
+		}
+		
+	// Wonder state check from StateCheck -- when the state is in Wonder
+	event wonderstate_true after(Kicker MK) returning (boolean wonderCheckRes):
+		call(public boolean StateCheck.WonderState(Kicker)) && condition(wonderCheckRes) && args(MK){
+			System.out.println("Wonder Event TEST TRUE");
+			BC.PrintState(State.WONDER);
+		}
+	
+	// Wonder state check from StateCheck -- when the state is not in Wonder
+	// but has been checked for wonder state
+	event wonderstate_false after(Kicker MK) returning (boolean wonderCheckRes):
+		call(public boolean StateCheck.WonderState(Kicker)) && condition(!wonderCheckRes) && args(MK){
+			System.out.println("Wonder Event TEST FALSE");
+		}
+		
+	
+	// Goto ball state check from StateCheck -- when the state is in Goto ball state
+	event gotoballstate_true after(Kicker MK) returning (boolean gtbCheckRes):
+		call(public boolean StateCheck.WonderState(Kicker)) && condition(gtbCheckRes) && args(MK){
+			System.out.println("GTB Event TEST TRUE");
+			BC.PrintState(State.GOTO_BALL);
+		}
+	
+	
+	// Goto ball state check from StateCheck -- when the state is  not in Goto ball state
+	// but has been checked for goto ball state
+	event gotoballstate_false after(Kicker MK) returning (boolean gtbCheckRes):
+		call(public boolean StateCheck.WonderState(Kicker)) && condition(!gtbCheckRes) && args(MK){
+			System.out.println("GTB Event TEST FALSE");
+		}
+		
+		
+	// Dribble ball state check from StateCheck -- when the state is in dribble ball state
+	event dribbleballstate_true after(Kicker MK) returning (boolean dbCheckRes):
+		call(public boolean StateCheck.WonderState(Kicker)) && condition(dbCheckRes) && args(MK){
+			System.out.println("DB Event TEST TRUE");
+			BC.PrintState(State.DRIBBLE_TO_GOAL);
+		}
+	
+	// Dribble ball state check from StateCheck -- when the state is  not in dribble ball state
+	// but has been checked for dribble ball state
+	event dribbleballstate_false after(Kicker MK) returning (boolean dbCheckRes):
+		call(public boolean StateCheck.WonderState(Kicker)) && condition(!dbCheckRes) && args(MK){
+			System.out.println("DB Event TEST FALSE");
+		}
+	
+	// Kick ball at goal state check from StateCheck -- when the state is in kick ball at goal state
+	event kickballatgoalstate_true after(Kicker MK) returning (boolean kbgCheckRes):
+		call(public boolean StateCheck.WonderState(Kicker)) && condition(kbgCheckRes) && args(MK){
+			System.out.println("KBG Event TEST TRUE");
+			BC.PrintState(State.KICK_BALL_TO_GOAL);
+		}
+	
+	// Kick ball at goal state check from StateCheck -- when the state is not in kick ball at goal state
+	// but has been checked for kick ball at goal state
+	event kickballatgoalstate_false after(Kicker MK) returning (boolean kbgCheckRes):
+		call(public boolean StateCheck.WonderState(Kicker)) && condition(!kbgCheckRes) && args(MK){
+			System.out.println("KBG Event TEST FALSE");
+		}
+	
+	event ballinfront_true after(Kicker MK) returning (boolean ballinfrontRes):
+		call(public boolean ballInFront(boolean)) && condition(ballinfrontRes) && this(MK){
+			currMK = MK;
+			System.out.println("Ball in front TRUE: "+ballinfrontRes);
+		}
+		
+	event ballinfront_false after(Kicker MK) returning (boolean ballinfrontRes):
+		call(public boolean ballInFront(boolean)) && condition(!ballinfrontRes) && this(MK){
+			currMK = MK;
+			System.out.println("Ball in front FALSE: "+ballinfrontRes);
+		}
+	
+	
+	/*ltl: [](wonderstate_true => (wonderstate_true U (ballinfront_true and o )))
+	
+	@violation {
+		__RESET;
+	}*/
+}
+

@@ -76,6 +76,7 @@ public class Kicker {
 				/*wonder();
 				kickBall(20, 100, 20, 100, 200, 1000);
 				gotoGoal(true);*/
+			//ballInFront(true);
 	}
 	
 	
