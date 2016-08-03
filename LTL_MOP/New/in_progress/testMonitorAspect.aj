@@ -34,9 +34,24 @@ public aspect testMonitorAspect implements com.runtimeverification.rvmonitor.jav
 	static Condition test_MOPLock_cond = test_MOPLock.newCondition();
 
 	pointcut MOP_CommonPointCut() : !within(com.runtimeverification.rvmonitor.java.rt.RVMObject+) && !adviceexecution() && BaseAspect.notwithin();
-	pointcut test_statechange(ChangeEvent CE, Kicker MK) : (call(public State StateCheck.GetState(ChangeEvent, Kicker)) && args(CE, MK)) && MOP_CommonPointCut();
-	after (ChangeEvent CE, Kicker MK) : test_statechange(CE, MK) {
-		testRuntimeMonitor.statechangeEvent(CE, MK);
+	pointcut test_kickballatgoalstate_enter(Kicker MK) : (call(public boolean StateCheck.KickBallAtGoal(Kicker)) && args(MK)) && MOP_CommonPointCut();
+	before (Kicker MK) : test_kickballatgoalstate_enter(MK) {
+		testRuntimeMonitor.kickballatgoalstate_enterEvent(MK);
+	}
+
+	pointcut test_dribbleballstate_enter(Kicker MK) : (call(public boolean StateCheck.DribbleBallState(Kicker)) && args(MK)) && MOP_CommonPointCut();
+	before (Kicker MK) : test_dribbleballstate_enter(MK) {
+		testRuntimeMonitor.dribbleballstate_enterEvent(MK);
+	}
+
+	pointcut test_gotoballstate_enter_4(Kicker MK) : (call(public boolean StateCheck.TurnToGoalState(Kicker)) && args(MK)) && MOP_CommonPointCut();
+	before (Kicker MK) : test_gotoballstate_enter_4(MK) {
+		testRuntimeMonitor.gotoballstate_enterEvent(MK);
+	}
+
+	pointcut test_gotoballstate_enter_3(Kicker MK) : (call(public boolean StateCheck.GotoBallState(Kicker)) && args(MK)) && MOP_CommonPointCut();
+	before (Kicker MK) : test_gotoballstate_enter_3(MK) {
+		testRuntimeMonitor.gotoballstate_enterEvent(MK);
 	}
 
 	pointcut test_wonderstate_true(Kicker MK) : (call(public boolean StateCheck.WonderState(Kicker)) && args(MK)) && MOP_CommonPointCut();
@@ -47,15 +62,23 @@ public aspect testMonitorAspect implements com.runtimeverification.rvmonitor.jav
 		testRuntimeMonitor.wonderstate_falseEvent(MK, wonderCheckRes);
 	}
 
-	pointcut test_gotoballstate_true(Kicker MK) : (call(public boolean StateCheck.WonderState(Kicker)) && args(MK)) && MOP_CommonPointCut();
-	after (Kicker MK) returning (boolean gtbCheckRes) : test_gotoballstate_true(MK) {
-		//test_gotoballstate_true
+	pointcut test_gotoballstate_true_3(Kicker MK) : (call(public boolean StateCheck.GotoBallState(Kicker)) && args(MK)) && MOP_CommonPointCut();
+	after (Kicker MK) returning (boolean gtbCheckRes) : test_gotoballstate_true_3(MK) {
+		//test_gotoballstate_true_3
 		testRuntimeMonitor.gotoballstate_trueEvent(MK, gtbCheckRes);
-		//test_gotoballstate_false
+		//test_gotoballstate_false_3
 		testRuntimeMonitor.gotoballstate_falseEvent(MK, gtbCheckRes);
 	}
 
-	pointcut test_dribbleballstate_true(Kicker MK) : (call(public boolean StateCheck.WonderState(Kicker)) && args(MK)) && MOP_CommonPointCut();
+	pointcut test_gotoballstate_true_4(Kicker MK) : (call(public boolean StateCheck.TurnToGoalState(Kicker)) && args(MK)) && MOP_CommonPointCut();
+	after (Kicker MK) returning (boolean ttgCheckRes) : test_gotoballstate_true_4(MK) {
+		//test_gotoballstate_true_4
+		testRuntimeMonitor.gotoballstate_trueEvent(MK, ttgCheckRes);
+		//test_gotoballstate_false_4
+		testRuntimeMonitor.gotoballstate_falseEvent(MK, ttgCheckRes);
+	}
+
+	pointcut test_dribbleballstate_true(Kicker MK) : (call(public boolean StateCheck.DribbleBallState(Kicker)) && args(MK)) && MOP_CommonPointCut();
 	after (Kicker MK) returning (boolean dbCheckRes) : test_dribbleballstate_true(MK) {
 		//test_dribbleballstate_true
 		testRuntimeMonitor.dribbleballstate_trueEvent(MK, dbCheckRes);
@@ -63,7 +86,7 @@ public aspect testMonitorAspect implements com.runtimeverification.rvmonitor.jav
 		testRuntimeMonitor.dribbleballstate_falseEvent(MK, dbCheckRes);
 	}
 
-	pointcut test_kickballatgoalstate_true(Kicker MK) : (call(public boolean StateCheck.WonderState(Kicker)) && args(MK)) && MOP_CommonPointCut();
+	pointcut test_kickballatgoalstate_true(Kicker MK) : (call(public boolean StateCheck.KickBallAtGoal(Kicker)) && args(MK)) && MOP_CommonPointCut();
 	after (Kicker MK) returning (boolean kbgCheckRes) : test_kickballatgoalstate_true(MK) {
 		//test_kickballatgoalstate_true
 		testRuntimeMonitor.kickballatgoalstate_trueEvent(MK, kbgCheckRes);
@@ -71,12 +94,20 @@ public aspect testMonitorAspect implements com.runtimeverification.rvmonitor.jav
 		testRuntimeMonitor.kickballatgoalstate_falseEvent(MK, kbgCheckRes);
 	}
 
-	pointcut test_ballinfront_true(Kicker MK) : (call(public boolean ballInFront(boolean)) && this(MK)) && MOP_CommonPointCut();
+	pointcut test_ballinfront_true(Kicker MK) : (call(public boolean Kicker.ballInFront(boolean, float[])) && !within(StateCheck) && target(MK)) && MOP_CommonPointCut();
 	after (Kicker MK) returning (boolean ballinfrontRes) : test_ballinfront_true(MK) {
 		//test_ballinfront_true
 		testRuntimeMonitor.ballinfront_trueEvent(MK, ballinfrontRes);
 		//test_ballinfront_false
 		testRuntimeMonitor.ballinfront_falseEvent(MK, ballinfrontRes);
+	}
+
+	pointcut test_ballclose_true(Kicker MK) : (call(public boolean Kicker.ballClose(boolean, float)) && target(MK)) && MOP_CommonPointCut();
+	after (Kicker MK) returning (boolean ballCloseRes) : test_ballclose_true(MK) {
+		//test_ballclose_true
+		testRuntimeMonitor.ballclose_trueEvent(MK, ballCloseRes);
+		//test_ballclose_false
+		testRuntimeMonitor.ballclose_falseEvent(MK, ballCloseRes);
 	}
 
 }

@@ -16,7 +16,6 @@ import lejos.hardware.sensor.HiTechnicIRSeekerV2;
 import lejos.robotics.SampleProvider;
 
 aspect RoboStateMachine{
-	StateCheck baseStateChecker = new StateCheck();
 	
 	
 	public void Kicker.test(){
@@ -41,9 +40,9 @@ aspect RoboStateMachine{
 	// IR -- Mod 
 	pointcut irModChange(Kicker MK) : cflowbelow(playPC(MK)) && set(float SensorControl.ballDirMod);
 	after(Kicker MK):irModChange(MK){
-		
 		System.out.println("!!!IR MOD Changed!!!");
-		baseStateChecker.GetState(ChangeEvent.IR_MOD, MK);
+		StateCheck.GetState(ChangeEvent.IR_MOD, MK);
+		//MK.ballClose(false,0);
 		//MK.PrintState(MK.GetState(MK.ChangeEvent.IR_MOD));
 		//MK.WonderState();
 		//MK.ballInFront(false);
@@ -53,7 +52,9 @@ aspect RoboStateMachine{
 	// IR -- UnMod
 	pointcut irUnModChange(Kicker MK) : cflowbelow(playPC(MK)) && set(float SensorControl.ballDirUnMod);
 	after(Kicker MK):irUnModChange(MK){
+		
 		System.out.println("!!!IR UN-MOD Changed!!!");
+		StateCheck.GetState(ChangeEvent.IR_UNMOD, MK);
 		//MK.PrintState(MK.GetState(MK.ChangeEvent.IR_UNMOD));
 		//MK.ballInFront(false);
 	}
@@ -62,6 +63,7 @@ aspect RoboStateMachine{
 	pointcut sonarChange(Kicker MK) : cflowbelow(playPC(MK)) && set(float[] SensorControl.distanceSample);
 	after(Kicker MK):sonarChange(MK){
 		System.out.println("!!!Sonar Changed!!!");
+		StateCheck.GetState(ChangeEvent.SONAR, MK);
 		//MK.PrintState(MK.GetState(MK.ChangeEvent.SONAR));
 		//MK.ballInFront(false);
 	}

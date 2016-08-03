@@ -4,20 +4,14 @@ import fullSoccer.*;
 import stateTools.*;
 test(Kicker MK) {
 
-	StateCheck BC = new StateCheck();
-
 	Kicker currMK;
-	event statechange(ChangeEvent CE, Kicker MK){
-		System.out.println("TEST EVENT");
-		BC.PrintState(BC.GetState(ChangeEvent.SONAR, MK));
-	}
 	event wonderstate_true(Kicker MK, boolean wonderCheckRes){
 		if ( ! (wonderCheckRes) ) {
 			return false;
 		}
 		{
 			System.out.println("Wonder Event TEST TRUE");
-			BC.PrintState(State.WONDER);
+			StateCheck.PrintState(State.WONDER);
 		}
 	}
 	event wonderstate_false(Kicker MK, boolean wonderCheckRes){
@@ -28,13 +22,17 @@ test(Kicker MK) {
 			System.out.println("Wonder Event TEST FALSE");
 		}
 	}
+	event gotoballstate_enter(Kicker MK){
+		System.out.println("GTB Event ENTER");
+		StateCheck.PrintState(State.GOTO_BALL);
+	}
 	event gotoballstate_true(Kicker MK, boolean gtbCheckRes){
 		if ( ! (gtbCheckRes) ) {
 			return false;
 		}
 		{
 			System.out.println("GTB Event TEST TRUE");
-			BC.PrintState(State.GOTO_BALL);
+			StateCheck.PrintState(State.GOTO_BALL);
 		}
 	}
 	event gotoballstate_false(Kicker MK, boolean gtbCheckRes){
@@ -45,13 +43,38 @@ test(Kicker MK) {
 			System.out.println("GTB Event TEST FALSE");
 		}
 	}
+	event gotoballstate_enter(Kicker MK){
+		System.out.println("TTG Event ENTER");
+		StateCheck.PrintState(State.TURN_TO_GOAL);
+	}
+	event gotoballstate_true(Kicker MK, boolean ttgCheckRes){
+		if ( ! (ttgCheckRes) ) {
+			return false;
+		}
+		{
+			System.out.println("TTG Event TEST TRUE");
+			StateCheck.PrintState(State.TURN_TO_GOAL);
+		}
+	}
+	event gotoballstate_false(Kicker MK, boolean ttgCheckRes){
+		if ( ! (!ttgCheckRes) ) {
+			return false;
+		}
+		{
+			System.out.println("TTG Event TEST FALSE");
+		}
+	}
+	event dribbleballstate_enter(Kicker MK){
+		System.out.println("DB Event ENTER");
+		StateCheck.PrintState(State.DRIBBLE_TO_GOAL);
+	}
 	event dribbleballstate_true(Kicker MK, boolean dbCheckRes){
 		if ( ! (dbCheckRes) ) {
 			return false;
 		}
 		{
 			System.out.println("DB Event TEST TRUE");
-			BC.PrintState(State.DRIBBLE_TO_GOAL);
+			StateCheck.PrintState(State.DRIBBLE_TO_GOAL);
 		}
 	}
 	event dribbleballstate_false(Kicker MK, boolean dbCheckRes){
@@ -62,13 +85,17 @@ test(Kicker MK) {
 			System.out.println("DB Event TEST FALSE");
 		}
 	}
+	event kickballatgoalstate_enter(Kicker MK){
+		System.out.println("KBG Event ENTER");
+		StateCheck.PrintState(State.KICK_BALL_TO_GOAL);
+	}
 	event kickballatgoalstate_true(Kicker MK, boolean kbgCheckRes){
 		if ( ! (kbgCheckRes) ) {
 			return false;
 		}
 		{
 			System.out.println("KBG Event TEST TRUE");
-			BC.PrintState(State.KICK_BALL_TO_GOAL);
+			StateCheck.PrintState(State.KICK_BALL_TO_GOAL);
 		}
 	}
 	event kickballatgoalstate_false(Kicker MK, boolean kbgCheckRes){
@@ -97,10 +124,29 @@ test(Kicker MK) {
 			System.out.println("Ball in front FALSE: " + ballinfrontRes);
 		}
 	}
-	ltl:  [](wonderstate_true => (wonderstate_true U ballinfront_true))
+	event ballclose_true(Kicker MK, boolean ballCloseRes){
+		if ( ! (ballCloseRes) ) {
+			return false;
+		}
+		{
+			currMK = MK;
+			System.out.println("Ball Close TRUE: " + ballCloseRes);
+		}
+	}
+	event ballclose_false(Kicker MK, boolean ballCloseRes){
+		if ( ! (!ballCloseRes) ) {
+			return false;
+		}
+		{
+			currMK = MK;
+			System.out.println("Ball Close FALSE: " + ballCloseRes);
+		}
+	}
+	ltl:  wonderstate_true => (wonderstate_true U ballclose_true) and o gotoballstate_enter
 
 	@violation
 	{
+		System.out.println("!!!WONDER TO GTB FAIL!!!");
 		__RESET;
 	}
 }
