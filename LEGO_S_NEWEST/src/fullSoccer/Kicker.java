@@ -38,10 +38,10 @@ public class Kicker {
 				//mainMC.KickBall();
 			}
 			System.out.println("Goal Shot: " + ballKickedToGoal);
-		}
+		}*/
 		//System.out.println("Goal Shot: " + GotoGoal(true));
 		//mainMC.DribbleBall();
-		System.out.println(getBallDirection());*/
+		//System.out.println(getBallDirection());
 		
 		
 		//!!!TESTING!!!
@@ -79,6 +79,7 @@ public class Kicker {
 			//ballInFront(true);
 			// Wonder to gotoball state test
 				//wonder();
+				ballInFront(true, null);
 				this.turnToBall();
 				this.gotoBall();
 
@@ -261,7 +262,7 @@ public class Kicker {
 	 *
 	 */
 	public boolean ballInFront(boolean rePingSensors, float[] preparedSensorVals){
-		System.out.println("Ball In Front Test");
+		System.out.println("Ball In Front Ping?: "+rePingSensors);
 		boolean sonarSuccess = false;
 		boolean irSuccess = false;
 		float sonarRead = -1;
@@ -522,7 +523,7 @@ public class Kicker {
 	 */
 	public boolean wonder(){
 		boolean ballGrabbable = false;	// Flag for the ball within the robot's arms
-		boolean ballInFront = false;	// Flag for ball in front of the robot
+		boolean ballInFront = ballInFront(true,null);	// Flag for ball in front of the robot
 		int gotoTry = 0;				// Count for ball grab attempts
 		
 		// Try to turn to the ball and goto it
