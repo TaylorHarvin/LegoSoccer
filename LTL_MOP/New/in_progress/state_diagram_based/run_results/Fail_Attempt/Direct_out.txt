@@ -1,0 +1,122 @@
+Executing jrun -cp /home/lejos/programs/test.jar lejos.internal.ev3.EV3Wrapper fullSoccer.PlayerInit in /home/lejos/programs
+Battery Current: 0.15628816
+Battery Voltage: 7.9894385
+Choose Player
+Player 1 Selected
+SEN SETUP
+Wonder Event ENTER
+***IR MOD Changed***
+*PERFORMING STATE CHECK*
+Goal Range: 167.7051
+Ball In Front Ping?: false
+Wonder Event TEST TRUE
+GEN WONDER
+Wonder Event TEST TRUE
+In -WONDER- State
+***IR UN-MOD Changed***
+*PERFORMING STATE CHECK*
+Goal Range: 167.7051
+Ball In Front Ping?: false
+Wonder Event TEST TRUE
+GEN WONDER
+Wonder Event TEST TRUE
+In -WONDER- State
+60.0
+Init Heading: 0.0
+Final: 60.0
+Ball In Front Ping?: true
+***Sonar Changed***
+*PERFORMING STATE CHECK*
+Goal Range: 167.7051
+Ball In Front Ping?: false
+INIT
+GEN NONE
+***IR MOD Changed***
+*PERFORMING STATE CHECK*
+Goal Range: 167.7051
+Ball In Front Ping?: false
+INIT
+GEN NONE
+***IR UN-MOD Changed***
+*PERFORMING STATE CHECK*
+Goal Range: 167.7051
+Ball In Front Ping?: false
+INIT
+GEN NONE
+Ball In Front Ping?: true
+***Sonar Changed***
+*PERFORMING STATE CHECK*
+Goal Range: 167.7051
+Ball In Front Ping?: false
+INIT
+GEN NONE
+***IR MOD Changed***
+*PERFORMING STATE CHECK*
+Goal Range: 167.7051
+Ball In Front Ping?: false
+INIT
+GEN NONE
+***IR UN-MOD Changed***
+*PERFORMING STATE CHECK*
+Goal Range: 167.7051
+Ball In Front Ping?: false
+INIT
+GEN NONE
+TURN Event EXIT
+MOVE BALL FOR FAIL -- NOW!
+Delay Finished!
+BIF CHECK RES: 0.0 , 0.0 , 0.0
+Ball In Front Ping?: true
+***Sonar Changed***
+*PERFORMING STATE CHECK*
+Goal Range: 167.7051
+Ball In Front Ping?: false
+Wonder Event TEST TRUE
+GEN WONDER
+Wonder Event TEST TRUE
+In -WONDER- State
+***IR MOD Changed***
+*PERFORMING STATE CHECK*
+Goal Range: 167.7051
+Ball In Front Ping?: false
+Wonder Event TEST TRUE
+GEN WONDER
+Wonder Event TEST TRUE
+In -WONDER- State
+***IR UN-MOD Changed***
+*PERFORMING STATE CHECK*
+Goal Range: 167.7051
+Ball In Front Ping?: false
+Wonder Event TEST TRUE
+GEN WONDER
+Wonder Event TEST TRUE
+In -WONDER- State
+GTB Event ENTER
+!!!WONDER TO GTB FAIL!!!
+Start Goto
+Ball In Front Ping?: true
+***Sonar Changed***
+*PERFORMING STATE CHECK*
+Goal Range: 167.7051
+Ball In Front Ping?: false
+Wonder Event TEST TRUE
+GEN WONDER
+Wonder Event TEST TRUE
+In -WONDER- State
+***IR MOD Changed***
+*PERFORMING STATE CHECK*
+Goal Range: 167.7051
+Ball In Front Ping?: false
+Wonder Event TEST TRUE
+GEN WONDER
+Wonder Event TEST TRUE
+In -WONDER- State
+***IR UN-MOD Changed***
+*PERFORMING STATE CHECK*
+Goal Range: 167.7051
+Ball In Front Ping?: false
+Wonder Event TEST TRUE
+GEN WONDER
+Wonder Event TEST TRUE
+In -WONDER- State
+Program finished
