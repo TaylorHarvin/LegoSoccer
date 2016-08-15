@@ -68,26 +68,6 @@ final class testMonitor_Set extends com.runtimeverification.rvmonitor.java.rt.ta
 		}
 		size = numAlive;
 	}
-	final void event_turnto_ball_state_exit_true(Kicker MK, boolean wonderCheckRes) {
-		int numAlive = 0 ;
-		for(int i = 0; i < this.size; i++){
-			testMonitor monitor = this.elements[i];
-			if(!monitor.isTerminated()){
-				elements[numAlive] = monitor;
-				numAlive++;
-
-				final testMonitor monitorfinalMonitor = monitor;
-				monitor.Prop_1_event_turnto_ball_state_exit_true(MK, wonderCheckRes);
-				if(monitorfinalMonitor.Prop_1_Category_violation) {
-					monitorfinalMonitor.Prop_1_handler_violation();
-				}
-			}
-		}
-		for(int i = numAlive; i < this.size; i++){
-			this.elements[i] = null;
-		}
-		size = numAlive;
-	}
 	final void event_gotoballstate_enter(Kicker MK) {
 		int numAlive = 0 ;
 		for(int i = 0; i < this.size; i++){
@@ -128,7 +108,7 @@ final class testMonitor_Set extends com.runtimeverification.rvmonitor.java.rt.ta
 		}
 		size = numAlive;
 	}
-	final void event_ballinfront_true(Kicker MK, boolean ballinfrontRes) {
+	final void event_ballinfront_true(Kicker MK) {
 		int numAlive = 0 ;
 		for(int i = 0; i < this.size; i++){
 			testMonitor monitor = this.elements[i];
@@ -137,7 +117,7 @@ final class testMonitor_Set extends com.runtimeverification.rvmonitor.java.rt.ta
 				numAlive++;
 
 				final testMonitor monitorfinalMonitor = monitor;
-				monitor.Prop_1_event_ballinfront_true(MK, ballinfrontRes);
+				monitor.Prop_1_event_ballinfront_true(MK);
 				if(monitorfinalMonitor.Prop_1_Category_violation) {
 					monitorfinalMonitor.Prop_1_handler_violation();
 				}
@@ -163,12 +143,13 @@ class testMonitor extends com.runtimeverification.rvmonitor.java.rt.tablebase.Ab
 
 	Kicker currMK;
 
-	static final int Prop_1_transition_turnto_ball_state_enter[] = {1, 2, 5, 2, 4, 5};;
-	static final int Prop_1_transition_turnto_ball_state_true[] = {4, 2, 5, 2, 4, 5};;
-	static final int Prop_1_transition_turnto_ball_state_exit_true[] = {4, 2, 5, 2, 4, 5};;
-	static final int Prop_1_transition_gotoballstate_enter[] = {4, 2, 5, 2, 4, 5};;
-	static final int Prop_1_transition_goto_ball_state_true[] = {4, 2, 5, 4, 4, 5};;
-	static final int Prop_1_transition_ballinfront_true[] = {4, 3, 5, 2, 4, 5};;
+	boolean failTried = false;
+
+	static final int Prop_1_transition_turnto_ball_state_enter[] = {2, 5, 1, 1, 4, 5};;
+	static final int Prop_1_transition_turnto_ball_state_true[] = {4, 5, 2, 1, 4, 5};;
+	static final int Prop_1_transition_gotoballstate_enter[] = {4, 5, 1, 4, 4, 5};;
+	static final int Prop_1_transition_goto_ball_state_true[] = {4, 5, 1, 1, 4, 5};;
+	static final int Prop_1_transition_ballinfront_true[] = {4, 5, 3, 1, 4, 5};;
 
 	volatile boolean Prop_1_Category_violation = false;
 
@@ -216,7 +197,7 @@ class testMonitor extends com.runtimeverification.rvmonitor.java.rt.tablebase.Ab
 		}
 
 		int nextstate = this.handleEvent(0, Prop_1_transition_turnto_ball_state_enter) ;
-		this.Prop_1_Category_violation = nextstate == 2;
+		this.Prop_1_Category_violation = nextstate == 1;
 
 		return true;
 	}
@@ -233,27 +214,7 @@ class testMonitor extends com.runtimeverification.rvmonitor.java.rt.tablebase.Ab
 		}
 
 		int nextstate = this.handleEvent(1, Prop_1_transition_turnto_ball_state_true) ;
-		this.Prop_1_Category_violation = nextstate == 2;
-
-		return true;
-	}
-
-	final boolean Prop_1_event_turnto_ball_state_exit_true(Kicker MK, boolean wonderCheckRes) {
-		{
-			if ( ! (wonderCheckRes) ) {
-				return false;
-			}
-			{
-				System.out.println("TURN Event EXIT, RES: TRUE");
-				System.out.println("MOVE BALL FOR FAIL -- NOW!");
-				Delay.msDelay(5000);
-				System.out.println("Delay Finished!");
-				Logger.log(LogFile.TURN_GTB, "turnto_ball_state_exit_true");
-			}
-		}
-
-		int nextstate = this.handleEvent(2, Prop_1_transition_turnto_ball_state_exit_true) ;
-		this.Prop_1_Category_violation = nextstate == 2;
+		this.Prop_1_Category_violation = nextstate == 1;
 
 		return true;
 	}
@@ -264,8 +225,8 @@ class testMonitor extends com.runtimeverification.rvmonitor.java.rt.tablebase.Ab
 			Logger.log(LogFile.TURN_GTB, "gotoballstate_enter");
 		}
 
-		int nextstate = this.handleEvent(3, Prop_1_transition_gotoballstate_enter) ;
-		this.Prop_1_Category_violation = nextstate == 2;
+		int nextstate = this.handleEvent(2, Prop_1_transition_gotoballstate_enter) ;
+		this.Prop_1_Category_violation = nextstate == 1;
 
 		return true;
 	}
@@ -281,25 +242,21 @@ class testMonitor extends com.runtimeverification.rvmonitor.java.rt.tablebase.Ab
 			}
 		}
 
-		int nextstate = this.handleEvent(4, Prop_1_transition_goto_ball_state_true) ;
-		this.Prop_1_Category_violation = nextstate == 2;
+		int nextstate = this.handleEvent(3, Prop_1_transition_goto_ball_state_true) ;
+		this.Prop_1_Category_violation = nextstate == 1;
 
 		return true;
 	}
 
-	final boolean Prop_1_event_ballinfront_true(Kicker MK, boolean ballinfrontRes) {
+	final boolean Prop_1_event_ballinfront_true(Kicker MK) {
 		{
-			if ( ! (ballinfrontRes) ) {
-				return false;
-			}
-			{
-				System.out.println("Ball in front TRUE: " + ballinfrontRes);
-				Logger.log(LogFile.TURN_GTB, "ballinfront_true");
-			}
+			currMK = MK;
+			System.out.println("Ball in front TRUE");
+			Logger.log(LogFile.TURN_GTB, "ballinfront_true");
 		}
 
-		int nextstate = this.handleEvent(5, Prop_1_transition_ballinfront_true) ;
-		this.Prop_1_Category_violation = nextstate == 2;
+		int nextstate = this.handleEvent(4, Prop_1_transition_ballinfront_true) ;
+		this.Prop_1_Category_violation = nextstate == 1;
 
 		return true;
 	}
@@ -307,6 +264,8 @@ class testMonitor extends com.runtimeverification.rvmonitor.java.rt.tablebase.Ab
 	final void Prop_1_handler_violation (){
 		{
 			System.out.println("!!!WONDER TO GTB FAIL!!!");
+			Logger.log(LogFile.TURN_GTB, "!!!WONDER TO GTB FAIL!!!");
+			Delay.msDelay(5000);
 			this.reset();
 		}
 
@@ -346,17 +305,20 @@ class testMonitor extends com.runtimeverification.rvmonitor.java.rt.tablebase.Ab
 
 			case 1:
 			//turnto_ball_state_true
-			return;
+			//alive_MK
+			if(!(alive_parameters_0)){
+				RVM_terminated = true;
+				return;
+			}
+			break;
+
 			case 2:
-			//turnto_ball_state_exit_true
-			return;
-			case 3:
 			//gotoballstate_enter
 			return;
-			case 4:
+			case 3:
 			//goto_ball_state_true
 			return;
-			case 5:
+			case 4:
 			//ballinfront_true
 			//alive_MK
 			if(!(alive_parameters_0)){
@@ -370,7 +332,7 @@ class testMonitor extends com.runtimeverification.rvmonitor.java.rt.tablebase.Ab
 	}
 
 	public static int getNumberOfEvents() {
-		return 6;
+		return 5;
 	}
 
 	public static int getNumberOfStates() {
@@ -511,55 +473,6 @@ class turnto_gotoballRuntimeMonitor implements com.runtimeverification.rvmonitor
 		turnto_gotoball_RVMLock.unlock();
 	}
 
-	public static final void turnto_ball_state_exit_trueEvent(Kicker MK, boolean wonderCheckRes) {
-		test_activated = true;
-		while (!turnto_gotoball_RVMLock.tryLock()) {
-			Thread.yield();
-		}
-
-		CachedWeakReference wr_MK = null;
-		MapOfMonitor<testMonitor> matchedLastMap = null;
-		testMonitor matchedEntry = null;
-		boolean cachehit = false;
-		if ((MK == test_MK_Map_cachekey_MK) ) {
-			matchedEntry = test_MK_Map_cachevalue;
-			cachehit = true;
-		}
-		else {
-			wr_MK = new CachedWeakReference(MK) ;
-			{
-				// FindOrCreateEntry
-				MapOfMonitor<testMonitor> itmdMap = test_MK_Map;
-				matchedLastMap = itmdMap;
-				testMonitor node_MK = test_MK_Map.getNodeEquivalent(wr_MK) ;
-				matchedEntry = node_MK;
-			}
-		}
-		// D(X) main:1
-		if ((matchedEntry == null) ) {
-			if ((wr_MK == null) ) {
-				wr_MK = new CachedWeakReference(MK) ;
-			}
-			// D(X) main:4
-			testMonitor created = new testMonitor() ;
-			matchedEntry = created;
-			matchedLastMap.putNode(wr_MK, created) ;
-		}
-		// D(X) main:8--9
-		final testMonitor matchedEntryfinalMonitor = matchedEntry;
-		matchedEntry.Prop_1_event_turnto_ball_state_exit_true(MK, wonderCheckRes);
-		if(matchedEntryfinalMonitor.Prop_1_Category_violation) {
-			matchedEntryfinalMonitor.Prop_1_handler_violation();
-		}
-
-		if ((cachehit == false) ) {
-			test_MK_Map_cachekey_MK = MK;
-			test_MK_Map_cachevalue = matchedEntry;
-		}
-
-		turnto_gotoball_RVMLock.unlock();
-	}
-
 	public static final void gotoballstate_enterEvent(Kicker MK) {
 		test_activated = true;
 		while (!turnto_gotoball_RVMLock.tryLock()) {
@@ -658,7 +571,7 @@ class turnto_gotoballRuntimeMonitor implements com.runtimeverification.rvmonitor
 		turnto_gotoball_RVMLock.unlock();
 	}
 
-	public static final void ballinfront_trueEvent(Kicker MK, boolean ballinfrontRes) {
+	public static final void ballinfront_trueEvent(Kicker MK) {
 		test_activated = true;
 		while (!turnto_gotoball_RVMLock.tryLock()) {
 			Thread.yield();
@@ -694,7 +607,7 @@ class turnto_gotoballRuntimeMonitor implements com.runtimeverification.rvmonitor
 		}
 		// D(X) main:8--9
 		final testMonitor matchedEntryfinalMonitor = matchedEntry;
-		matchedEntry.Prop_1_event_ballinfront_true(MK, ballinfrontRes);
+		matchedEntry.Prop_1_event_ballinfront_true(MK);
 		if(matchedEntryfinalMonitor.Prop_1_Category_violation) {
 			matchedEntryfinalMonitor.Prop_1_handler_violation();
 		}
@@ -751,19 +664,14 @@ public aspect turnto_gotoballMonitorAspect implements com.runtimeverification.rv
 		turnto_gotoballRuntimeMonitor.turnto_ball_state_trueEvent(MK, wonderCheckRes);
 	}
 
-	pointcut test_turnto_ball_state_exit_true(Kicker MK) : (call(public boolean Kicker.turnToBall()) && this(MK)) && MOP_CommonPointCut();
-	after (Kicker MK) returning (boolean wonderCheckRes) : test_turnto_ball_state_exit_true(MK) {
-		turnto_gotoballRuntimeMonitor.turnto_ball_state_exit_trueEvent(MK, wonderCheckRes);
-	}
-
 	pointcut test_goto_ball_state_true(Kicker MK) : (call(public boolean StateCheck.GotoBallState(Kicker)) && !execution(State StateCheck.GetState(ChangeEvent, Kicker)) && args(MK)) && MOP_CommonPointCut();
 	after (Kicker MK) returning (boolean gtbCheckRes) : test_goto_ball_state_true(MK) {
 		turnto_gotoballRuntimeMonitor.goto_ball_state_trueEvent(MK, gtbCheckRes);
 	}
 
-	pointcut test_ballinfront_true(Kicker MK) : (call(public boolean Kicker.ballInFront(boolean, float[])) && !within(StateCheck) && target(MK)) && MOP_CommonPointCut();
-	after (Kicker MK) returning (boolean ballinfrontRes) : test_ballinfront_true(MK) {
-		turnto_gotoballRuntimeMonitor.ballinfront_trueEvent(MK, ballinfrontRes);
+	pointcut test_ballinfront_true(Kicker MK) : (call(public void Kicker.generateBallInFrontState()) && target(MK)) && MOP_CommonPointCut();
+	after (Kicker MK) : test_ballinfront_true(MK) {
+		turnto_gotoballRuntimeMonitor.ballinfront_trueEvent(MK);
 	}
 
 }

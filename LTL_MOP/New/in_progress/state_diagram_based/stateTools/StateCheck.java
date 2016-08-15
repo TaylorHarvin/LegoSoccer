@@ -14,21 +14,21 @@ import lejos.robotics.SampleProvider;*/
 
 	
 public final class StateCheck{	
-	static boolean sonarSuccess = false;
-	static boolean modIrSuccess = false;
-	static boolean unModIrSuccess = false;
+	public static boolean sonarSuccess = false;
+	public static boolean modIrSuccess = false;
+	public static boolean unModIrSuccess = false;
 	
-	static float irModRead = -1;
-	static float irUnModRead = -1;
-	static float sonarRead = -1;
+	public static float irModRead = -1;
+	public static float irUnModRead = -1;
+	public static float sonarRead = -1;
 	
-	static boolean inGoalRange = false;
-	static boolean ballInFront = false;
-	static boolean ballClose = false;
-	static boolean ballKickable = false;
-	static boolean robotMoving = false;
-	static boolean robotTurning = false;
-	
+	public static boolean inGoalRange = false;
+	public static boolean ballInFront = false;
+	public static boolean ballClose = false;
+	public static boolean ballKickable = false;
+	public static boolean robotMoving = false;
+	public static boolean robotTurning = false;
+	public static boolean bifStateGen;
 	
 	// NOTE: Returning true => that the robot should be in this state
 	public static boolean WonderState(Kicker currMK){
@@ -180,4 +180,18 @@ public final class StateCheck{
 				break;
 		}
 	}
+	
+	/*public static void generateBallInFrontState(){
+		System.out.println("Generated BIF");
+		bifStateGen = true;
+	}
+	
+	public static boolean checkBallInFront(Kicker currMK){
+		float[] sensorPack = new float[3];
+		sensorPack[0] = currMK.getSensorControl().getLastSonar();
+		sensorPack[1] = currMK.getSensorControl().getLastModIR();
+		sensorPack[2] = currMK.getSensorControl().getLastUnModIR();
+		System.out.println("BIF CHECK RES: "+sensorPack[0]+" , "+sensorPack[1]+" , "+sensorPack[2]);
+		return currMK.ballInFront(false,sensorPack);
+	}*/
 }
