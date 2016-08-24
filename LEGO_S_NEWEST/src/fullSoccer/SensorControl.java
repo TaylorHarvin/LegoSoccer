@@ -22,8 +22,9 @@ public class SensorControl {
 	
 	//private HiTechnicCompass compassSensor;		// The actual compass
 	//private SampleProvider compassSP;			// compass sample provider
-	private float ballDirMod;					// Last read IR Mod value
-	private float ballDirUnMod;					// Last read IR Un-Mod value
+	private float ballDirMod = 9999;					// Last read IR Mod value
+	private float ballDirUnMod = 9999;					// Last read IR Un-Mod value
+	private float sonarRead = 9999;
 	
 	// Simulation parts
 	private FileReader simFileReader;
@@ -115,7 +116,7 @@ public class SensorControl {
 	
 	// Just returns the last read sonar 
 	public float getLastSonar(){
-		return distanceSample[0];
+		return sonarRead;
 	}
 	
 	
@@ -157,15 +158,16 @@ public class SensorControl {
 			distMode.fetchSample(distanceSample, 0);
 			//System.out.println(distanceSample[0]);
 			Delay.msDelay(50);
+			sonarRead = distanceSample[0];
 		}
 		else{
 			// Grab value from file or DB here if in sim
 		}
 		
 		// Check for valid sonar value
-		if(!Float.isNaN(distanceSample[0])){
-			if(distanceSample[0] <= 0)
-				distanceSample[0] = 9999;
+		if(!Float.isNaN(sonarRead)){
+			if(sonarRead <= 0)
+				sonarRead = 9999;
 			return true;
 		}
 		else

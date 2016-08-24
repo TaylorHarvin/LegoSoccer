@@ -1,7 +1,8 @@
 // Base State LTL
 // Events pulled from the StateCheck class in collaboration with RoboStateMachine.aj
 // Also based directly off of the state diagram to ensure proper transitions
-// from state to state
+// -----------------------------------------------------------------------------------
+// FROM: Goto ball state to turn to ball state
 
 
 //package mop;
@@ -32,7 +33,7 @@ test(Kicker MK) {
 	
 	// Turn-To-Ball state check from StateCheck -- when the state is in Turn-To-Ball
 	event turnto_ball_state_true after(Kicker MK) returning (boolean wonderCheckRes):
-		call(public boolean StateCheck.WonderState(Kicker)) && condition(wonderCheckRes) && !execution(State StateCheck.GetState(ChangeEvent, Kicker)) && args(MK){
+		call(public boolean StateCheck.WonderState(Kicker)) && condition(wonderCheckRes) &&  !execution(State StateCheck.GetState(ChangeEvent, Kicker)) && args(MK){
 			System.out.println("Wonder Event TEST TRUE");
 			Logger.log(LogFile.TURN_GTB,"turnto_ball_state_true");
 		}
@@ -85,7 +86,7 @@ test(Kicker MK) {
 			
 	
 	@violation {
-		System.out.println("!!!WONDER TO GTB FAIL!!!");
+		System.out.println("!!!TURN TO GTB FAIL!!!");
 		Logger.log(LogFile.TURN_GTB,"!!!WONDER TO GTB FAIL!!!");
 		Delay.msDelay(5000);
 		__RESET;

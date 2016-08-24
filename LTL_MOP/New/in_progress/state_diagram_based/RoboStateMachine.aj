@@ -25,10 +25,20 @@ aspect RoboStateMachine{
 	
 	// Check the current ball in front state from the Kicker (without triggering any events)
 	public boolean Kicker.checkBallInFront(Kicker currMK){
-		float[] sensorPack = new float[3];
-		System.out.println("BIF CHECK RES: "+sensorPack[0]+" , "+sensorPack[1]+" , "+sensorPack[2]);
-		return currMK.ballInFront(true,null);
+		return currMK.ballInFront(true);
 	}
+	
+	
+	// Generate the ball close true event on-demand rather than through Kicker
+	public void Kicker.generateBallCloseState(){
+		System.out.println("Generated Ball Close");
+	}
+	
+	// Check the current ball close state from the Kicker (without triggering any events)
+	public boolean Kicker.checkBallClose(Kicker currMK){
+		return currMK.ballClose(true);
+	}
+	
 	
 	// Generate the current state on-demand here rather than directly from state check method
 	public void Kicker.generateStateEvent(State currState, Kicker currMK){
@@ -70,11 +80,11 @@ aspect RoboStateMachine{
 	// General pointcut to allow for access to Kicker object for other pointcuts (through cflowbelow)
 	pointcut playPC(Kicker MK) : call(public void Kicker.play()) && target(MK);
 	// IR -- Mod advice, handle change in IR MOD value (after new ping)
-	pointcut irModChange(Kicker MK) : cflowbelow(playPC(MK)) && set(float SensorControl.ballDirMod);
+	pointcut irModChange(Kicker MK) : cflowbelow(playPC(MK)) && set(float SensorControl.ballDirMod)&& within(SensorControl);
 	// IR -- Un-Mod advice, handle change in IR UN-MOD value (after new ping)
-	pointcut irUnModChange(Kicker MK) : cflowbelow(playPC(MK)) && set(float SensorControl.ballDirUnMod);
+	pointcut irUnModChange(Kicker MK) : cflowbelow(playPC(MK)) && set(float SensorControl.ballDirUnMod)&& within(SensorControl);
 	// Sonar -- Sonar advice, handle change in Sonar value (after new ping)
-	pointcut sonarChange(Kicker MK) : cflowbelow(playPC(MK)) && set(float SensorControl.sonarRead);
+	pointcut sonarChange(Kicker MK) : cflowbelow(playPC(MK)) && set(float SensorControl.sonarRead)&& within(SensorControl);
 	// Trigger needed events for after turn to ball state
 	pointcut turnto_ball_state_exit(Kicker MK) : call(public boolean Kicker.turnToBall()) && this(MK);
 	

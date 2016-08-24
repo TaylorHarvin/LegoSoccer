@@ -1,0 +1,115 @@
+// Base State LTL
+// Events pulled from the StateCheck class in collaboration with RoboStateMachine.aj
+// Also based directly off of the state diagram to ensure proper transitions
+// -----------------------------------------------------------------------------------
+// All events listing
+
+
+//package mop;
+
+import java.io.*;
+import java.util.*;
+import fullSoccer.*;
+import stateTools.*;
+import loggingTools.*;
+import lejos.utility.Delay;
+
+AllEvents(Kicker MK) { 
+	Kicker currMK;	// Reference to kicker for the ltl violation
+	// Turn to ball******************************************************************************************************
+		event turnto_ball_state_enter before(Kicker MK):
+			call(public boolean Kicker.turnToBall()) && this(MK){
+				System.out.println("Wonder Event ENTER");
+				//StateCheck.PrintState(State.WONDER);
+				//StateCheck.GetState(ChangeEvent.IR_MOD, MK);
+				//StateCheck.WonderState(currMK);
+				Logger.log(LogFile.ALL_EVENTS,"turnto_ball_state_enter");
+			}
+		
+		
+		// Turn-To-Ball state check from StateCheck -- when the state is in Turn-To-Ball
+		event turnto_ball_state_true after(Kicker MK) returning (boolean wonderCheckRes):
+			call(public boolean StateCheck.WonderState(Kicker)) && condition(wonderCheckRes) &&  !execution(State StateCheck.GetState(ChangeEvent, Kicker)) && args(MK){
+				System.out.println("Wonder Event TEST TRUE");
+				Logger.log(LogFile.ALL_EVENTS,"turnto_ball_state_true");
+			}
+	// Go to ball********************************************************************************************************
+		// Goto ball state check from StateCheck -- BEFORE
+		event gotoballstate_enter before(Kicker MK):
+			call(public boolean Kicker.gotoBall()) && this(MK){
+				System.out.println("GTB Event ENTER");
+				//StateCheck.GetState(ChangeEvent.IR_MOD, MK);
+				//StateCheck.PrintState(State.GOTO_BALL);
+				Logger.log(LogFile.ALL_EVENTS,"gotoballstate_enter");
+			}
+		// Goto ball state is true -- but it is tied with a method in StateCheck (rather than Kicker)
+		// Ball must be in front, robot must be moving and the ball must not be close
+		// NOTE: Goto ball enterence does not equate to this due to the fact that the robot
+		// hasn't started the goto proceedure until after the before event -- !!!Add new state later!!!
+		event goto_ball_state_true after(Kicker MK) returning (boolean gtbCheckRes):
+			call(public boolean StateCheck.GotoBallState(Kicker)) && condition(gtbCheckRes) && !execution(State StateCheck.GetState(ChangeEvent, Kicker)) && args(MK){
+				System.out.println("GTB Event TEST TRUE");
+				Logger.log(LogFile.ALL_EVENTS,"goto_ball_state_true");
+			}
+	// Turn to goal******************************************************************************************************
+		// Turn-To-Goal enter
+		event goto_goal_state_enter before(Kicker MK):
+			call(public boolean Kicker.gotoGoal(boolean)) && this(MK){
+				System.out.println("Wonder Event ENTER");
+				Logger.log(LogFile.ALL_EVENTS,"goto_goal_state_enter");
+			}
+		
+		
+		// Turn-To-Goal state check from StateCheck -- when the state is in Turn-To-Goal
+		event turnto_goal_state_true after(Kicker MK) returning (boolean ttgCheckRes):
+			call(public boolean StateCheck.TurnToGoalState(Kicker)) && condition(ttgCheckRes) &&  !execution(State StateCheck.GetState(ChangeEvent, Kicker)) && args(MK){
+				System.out.println("TTG Event TEST TRUE");
+				Logger.log(LogFile.ALL_EVENTS,"turnto_goal_state_true");
+			}
+	// Dribble ball to goal**********************************************************************************************
+		// Dribble-To-Goal enter
+		event dribble_to_goal_state_enter before(Kicker MK):
+			call(public void Kicker.dribbleBall()) && this(MK){
+				System.out.println("Dribble Event Event ENTER");
+				Logger.log(LogFile.ALL_EVENTS,"Dribble_state_enter");
+			}
+			
+		// Dribble-To-Goal state check from StateCheck -- when the state is in Dribble-To-Goal
+		event dribble_to_goal_state_true after(Kicker MK) returning (boolean dribbleCheckRes):
+			call(public boolean StateCheck.DribbleBallState(Kicker)) && condition(dribbleCheckRes) &&  !execution(State StateCheck.GetState(ChangeEvent, Kicker)) && args(MK){
+				System.out.println("Dribble Event TEST TRUE");
+				Logger.log(LogFile.ALL_EVENTS,"dribble_to_goal_state_true");
+			}
+	// Kick ball at goal*************************************************************************************************
+		// Kick ball at goal enter
+		event kick_at_goal_state_enter before(Kicker MK):
+			call(public void Kicker.kickBall(int,int,int,int,int,int)) && this(MK){
+				System.out.println("Kick ball Event Event ENTER");
+				Logger.log(LogFile.ALL_EVENTS,"Kick_ball_state_enter");
+			}
+		
+		// Kick ball to Goal state check from StateCheck -- when the state is in kick ball
+		event kick_ball_state_true after(Kicker MK) returning (boolean dribbleCheckRes):
+			call(public boolean StateCheck.KickBallAtGoal(Kicker)) && condition(dribbleCheckRes) &&  !execution(State StateCheck.GetState(ChangeEvent, Kicker)) && args(MK){
+				System.out.println("Kick Event TEST TRUE");
+				Logger.log(LogFile.ALL_EVENTS,"kick_ball_state_true");
+			}
+		
+		
+	// Additional transition methods*************************************************************************************
+		// Basic ball in front -- if true
+		// NOTE: this is now tied to a secondary method called in RoboStateMachine.aj
+		event ballinfront_true after(Kicker MK):
+			call(public void Kicker.generateBallInFrontState()) && target(MK){
+				currMK = MK;
+				System.out.println("Ball in front TRUE");
+				Logger.log(LogFile.ALL_EVENTS,"ballinfront_true");
+			}
+		
+		event ball_close_true before(Kicker MK):
+			call(public boolean Kicker.ballClose(boolean)) && this(MK){
+				System.out.println("Ball Close TRUE");
+				Logger.log(LogFile.ALL_EVENTS,"ballclose_true");
+			}
+}
+

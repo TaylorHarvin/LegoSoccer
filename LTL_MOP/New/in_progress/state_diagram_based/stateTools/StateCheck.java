@@ -30,6 +30,41 @@ public final class StateCheck{
 	public static boolean robotTurning = false;
 	public static boolean bifStateGen;
 	
+	
+	public static boolean BallInFront(float sonar, float irMod, float irUnMod){
+		if(sonarRead < SoccerGlobals.BALL_SONAR_DIST_GRAB){
+			return true;
+		}
+		//************** IR Check -- Modulated*****************//
+		if(!Float.isNaN((irMod))){
+			if(irMod == 0){
+				return true;
+			}
+		}
+		
+		//************** IR Check -- UnModulated***************//
+		if(!Float.isNaN(irUnMod)){
+			if(irUnMod == 0){
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	public static boolean BallClose(float sonar){
+		if(sonar < SoccerGlobals.BALL_SONAR_DIST_GRAB)
+			return true;
+		return false;
+	}
+	
+	public static boolean BallKickable(float sonar){
+		if(sonar < SoccerGlobals.SONAR_OBJECT_KICKABLE)
+			return true;
+		return false;
+	}
+	
+	
+	
 	// NOTE: Returning true => that the robot should be in this state
 	public static boolean WonderState(Kicker currMK){
 		if(!ballInFront)
@@ -63,7 +98,6 @@ public final class StateCheck{
 	// Turning to goal state
 	public static boolean TurnToGoalState(Kicker currMK){
 		// Ball should remain in front of the robot while turning
-		// NOTE: Need turning check
 		if(ballInFront && ballClose && robotTurning)
 			return true;
 		else
@@ -104,19 +138,20 @@ public final class StateCheck{
 		if(currEvent != ChangeEvent.IR_UNMOD)
 			unModIrSuccess = currMK.getSensorControl().fetchAngleVal(true);*/
 		
+		
+		//!!! NOTE: Might need to perform non-ping, and rely only on the previously retrieved
+		// values, however, 
 		sonarRead = currMK.getSensorControl().pingSonar();
 		irModRead = currMK.getSensorControl().pingIr(true);
 		irUnModRead = currMK.getSensorControl().pingIr(false);
+		System.out.println("BIF CHECK RES: "+sonarRead+" , "+irModRead+" , "+irUnModRead);
 		
-		float[] sensorPack = new float[3];
-		sensorPack[0] = sonarRead;
-		sensorPack[1] = irModRead;
-		sensorPack[2] = irUnModRead;
+		
+		ballInFront = BallInFront(sonarRead, irModRead, irUnModRead);
 		
 		inGoalRange = currMK.getMotionControl().inGoalRange();
-		ballInFront = currMK.ballInFront(false,sensorPack);
-		ballClose = currMK.ballClose(false,sonarRead);
-		ballKickable = currMK.ballKickable(false,sonarRead);
+		ballClose = BallClose(sonarRead);
+		ballKickable = BallKickable(sonarRead);
 		robotMoving = currMK.getMotionControl().robotMoving();
 		robotTurning = currMK.getMotionControl().robotTurning();
 		
