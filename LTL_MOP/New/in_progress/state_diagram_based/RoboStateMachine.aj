@@ -17,6 +17,22 @@ import lejos.robotics.SampleProvider;
 import lejos.utility.Delay;
 
 aspect RoboStateMachine{
+	private long lastStateCheck = System.currentTimeMillis();
+	private final long PING_TIME_LIMIT = 10000;
+	private boolean sonarSet = false;
+	private boolean irModSet = false;
+	private boolean irUnModSet = false;
+	
+	
+	public boolean readyForStateCheck(){
+		return (sonarSet && irModSet && irUnModSet);
+	}
+	
+	public void resetStatePreCheck(){
+		sonarSet = false;
+		irModSet = false;
+		irUnModSet = false;
+	}
 	
 	// Generate the ball in front true event on-demand rather than through Kicker
 	public void Kicker.generateBallInFrontState(){
@@ -79,12 +95,9 @@ aspect RoboStateMachine{
 	//POINTCUT SECTION**************************************************************************
 	// General pointcut to allow for access to Kicker object for other pointcuts (through cflowbelow)
 	pointcut playPC(Kicker MK) : call(public void Kicker.play()) && target(MK);
-	// IR -- Mod advice, handle change in IR MOD value (after new ping)
-	pointcut irModChange(Kicker MK) : cflowbelow(playPC(MK)) && set(float SensorControl.ballDirMod)&& within(SensorControl);
-	// IR -- Un-Mod advice, handle change in IR UN-MOD value (after new ping)
-	pointcut irUnModChange(Kicker MK) : cflowbelow(playPC(MK)) && set(float SensorControl.ballDirUnMod)&& within(SensorControl);
-	// Sonar -- Sonar advice, handle change in Sonar value (after new ping)
-	pointcut sonarChange(Kicker MK) : cflowbelow(playPC(MK)) && set(float SensorControl.sonarRead)&& within(SensorControl);
+	
+	
+	
 	// Trigger needed events for after turn to ball state
 	pointcut turnto_ball_state_exit(Kicker MK) : call(public boolean Kicker.turnToBall()) && this(MK);
 	
@@ -93,31 +106,56 @@ aspect RoboStateMachine{
 	
 	
 	// IR -- Mod advice, handle change in IR MOD value (after new ping)
+	pointcut irModChange(Kicker MK) : cflowbelow(playPC(MK)) && set(float SensorControl.ballDirMod)&& within(SensorControl);
+	// IR -- Mod advice, handle change in IR MOD value (after new ping)
 	after(Kicker MK):irModChange(MK){
-		System.out.println("***IR MOD Changed***");
-		State currState = StateCheck.GetState(ChangeEvent.IR_MOD, MK);
-		MK.generateStateEvent(currState,MK);
-		StateCheck.PrintState(currState);
+		irModSet = true;
+		//System.out.println("Time Diff: "+(System.currentTimeMillis()-lastStateCheck));
+		//if((System.currentTimeMillis()-lastStateCheck) > PING_TIME_LIMIT){
+		if(readyForStateCheck()){
+			lastStateCheck = System.currentTimeMillis();
+			System.out.println("***IR MOD Changed***");
+			State currState = StateCheck.GetState(ChangeEvent.IR_MOD, MK);
+			MK.generateStateEvent(currState,MK);
+			StateCheck.PrintState(currState);
+			resetStatePreCheck();
+		}
 	}
 	
 	
-
+	// IR -- Un-Mod advice, handle change in IR UN-MOD value (after new ping)
+	pointcut irUnModChange(Kicker MK) : cflowbelow(playPC(MK)) && set(float SensorControl.ballDirUnMod)&& within(SensorControl);
 	// IR -- Un-Mod advice, handle change in IR UN-MOD value (after new ping)
 	after(Kicker MK):irUnModChange(MK){
-		
-		System.out.println("***IR UN-MOD Changed***");
-		//StateCheck.GetState(ChangeEvent.IR_UNMOD, MK);
-		State currState = StateCheck.GetState(ChangeEvent.IR_UNMOD, MK);
-		MK.generateStateEvent(currState,MK);
-		StateCheck.PrintState(currState);
+		irUnModSet = true;
+		//System.out.println("Time Diff: "+(System.currentTimeMillis()-lastStateCheck));
+		//if((System.currentTimeMillis()-lastStateCheck) > PING_TIME_LIMIT){
+		if(readyForStateCheck()){
+			lastStateCheck = System.currentTimeMillis();
+			System.out.println("***IR UN-MOD Changed***");
+			//StateCheck.GetState(ChangeEvent.IR_UNMOD, MK);
+			State currState = StateCheck.GetState(ChangeEvent.IR_UNMOD, MK);
+			MK.generateStateEvent(currState,MK);
+			StateCheck.PrintState(currState);
+			resetStatePreCheck();
+		}
 	}
 	
 	// Sonar -- Sonar advice, handle change in Sonar value (after new ping)
+	pointcut sonarChange(Kicker MK) : cflowbelow(playPC(MK)) && set(float SensorControl.sonarRead)&& within(SensorControl);
+	// Sonar -- Sonar advice, handle change in Sonar value (after new ping)
 	after(Kicker MK):sonarChange(MK){
-		System.out.println("***Sonar Changed***");
-		State currState = StateCheck.GetState(ChangeEvent.SONAR, MK);
-		MK.generateStateEvent(currState,MK);
-		StateCheck.PrintState(currState);
+		sonarSet = true;
+		//System.out.println("Time Diff: "+(System.currentTimeMillis()-lastStateCheck));
+		//if((System.currentTimeMillis()-lastStateCheck) > PING_TIME_LIMIT){
+		if(readyForStateCheck()){
+			lastStateCheck = System.currentTimeMillis();
+			System.out.println("***Sonar Changed***");
+			State currState = StateCheck.GetState(ChangeEvent.SONAR, MK);
+			MK.generateStateEvent(currState,MK);
+			StateCheck.PrintState(currState);
+			resetStatePreCheck();
+		}
 	}
 	
 	

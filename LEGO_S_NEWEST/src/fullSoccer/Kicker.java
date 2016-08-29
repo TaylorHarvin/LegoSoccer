@@ -27,7 +27,7 @@ public class Kicker {
 	public void play(){
 		boolean ballKickedToGoal = false;
 		//Wonder();
-		while(!ballKickedToGoal){
+		/*while(!ballKickedToGoal){
 			// The ball was found, bring it to the goal
 			if(wonder()){
 				System.out.println("Wonder Worked");
@@ -38,7 +38,7 @@ public class Kicker {
 				//mainMC.KickBall();
 			}
 			System.out.println("Goal Shot: " + ballKickedToGoal);
-		}
+		}*/
 		//System.out.println("Goal Shot: " + GotoGoal(true));
 		//mainMC.DribbleBall();
 		//System.out.println(getBallDirection());
@@ -83,6 +83,14 @@ public class Kicker {
 				
 				/*this.turnToBall();
 				this.gotoBall();*/
+				//this.kickBall(0, 1000, 30, 30, 500, 500);
+				ballInFront(true);
+				/*int count = 1000;
+				while(count > 0){
+					ballInFront(true);
+					count--;
+				}*/
+				
 				/*mainSC.getAllIrSig();
 				mainSC.fetchSonarVal();
 				System.out.println("Sonar: "+mainSC.getLastSonar()+" , MOD: "+mainSC.getLastModIR()+" , UNMOD: "+mainSC.getLastUnModIR());
@@ -259,6 +267,8 @@ public class Kicker {
 	 *
 	 */
 	public boolean ballInFront(boolean rePingSensors){
+		long startTime = 0;
+		long endTime = 0;
 		System.out.println("Ball In Front Ping?: "+rePingSensors);
 		boolean sonarSuccess = false;
 		boolean irSuccess = false;
@@ -268,11 +278,13 @@ public class Kicker {
 		
 		//************** Re-Ping Sensors if requested **************************//
 		if(rePingSensors){
+			startTime = System.currentTimeMillis();
 			//if(!Float.isNaN(mainSC.getLastSonar()))
 			sonarSuccess = mainSC.fetchSonarVal();
 			//if(!Float.isNaN(mainSC.getLastModIR()) || !Float.isNaN(mainSC.getLastUnModIR()))
 			irSuccess = mainSC.getAllIrSig();
-			
+			endTime = System.currentTimeMillis();
+			System.out.println("Time: "+(endTime-startTime));
 		}
 		else{
 			sonarSuccess = true;

@@ -141,9 +141,12 @@ public final class StateCheck{
 		
 		//!!! NOTE: Might need to perform non-ping, and rely only on the previously retrieved
 		// values, however, 
-		sonarRead = currMK.getSensorControl().pingSonar();
-		irModRead = currMK.getSensorControl().pingIr(true);
-		irUnModRead = currMK.getSensorControl().pingIr(false);
+		//sonarRead = currMK.getSensorControl().pingSonar();
+		sonarRead = currMK.getSensorControl().getLastSonar();
+		irModRead = currMK.getSensorControl().getLastModIR();
+		//irModRead = currMK.getSensorControl().pingIr(true);
+		//irUnModRead = currMK.getSensorControl().pingIr(false);
+		irUnModRead = currMK.getSensorControl().getLastUnModIR();
 		System.out.println("BIF CHECK RES: "+sonarRead+" , "+irModRead+" , "+irUnModRead);
 		
 		

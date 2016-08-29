@@ -263,7 +263,7 @@ class testMonitor extends com.runtimeverification.rvmonitor.java.rt.tablebase.Ab
 
 	final void Prop_1_handler_violation (){
 		{
-			System.out.println("!!!WONDER TO GTB FAIL!!!");
+			System.out.println("!!!TURN TO GTB FAIL!!!");
 			Logger.log(LogFile.TURN_GTB, "!!!WONDER TO GTB FAIL!!!");
 			Delay.msDelay(5000);
 			this.reset();
