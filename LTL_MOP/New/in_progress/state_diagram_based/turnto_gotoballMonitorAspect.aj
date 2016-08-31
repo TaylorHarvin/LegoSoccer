@@ -48,7 +48,7 @@ final class testMonitor_Set extends com.runtimeverification.rvmonitor.java.rt.ta
 		}
 		size = numAlive;
 	}
-	final void event_turnto_ball_state_true(Kicker MK, boolean wonderCheckRes) {
+	final void event_turnto_ball_state_true(Kicker MK, boolean TurnCheckRes) {
 		int numAlive = 0 ;
 		for(int i = 0; i < this.size; i++){
 			testMonitor monitor = this.elements[i];
@@ -57,7 +57,7 @@ final class testMonitor_Set extends com.runtimeverification.rvmonitor.java.rt.ta
 				numAlive++;
 
 				final testMonitor monitorfinalMonitor = monitor;
-				monitor.Prop_1_event_turnto_ball_state_true(MK, wonderCheckRes);
+				monitor.Prop_1_event_turnto_ball_state_true(MK, TurnCheckRes);
 				if(monitorfinalMonitor.Prop_1_Category_violation) {
 					monitorfinalMonitor.Prop_1_handler_violation();
 				}
@@ -192,7 +192,7 @@ class testMonitor extends com.runtimeverification.rvmonitor.java.rt.tablebase.Ab
 
 	final boolean Prop_1_event_turnto_ball_state_enter(Kicker MK) {
 		{
-			System.out.println("Wonder Event ENTER");
+			System.out.println("Turn_To_Ball Event ENTER");
 			Logger.log(LogFile.TURN_GTB, "turnto_ball_state_enter");
 		}
 
@@ -202,13 +202,13 @@ class testMonitor extends com.runtimeverification.rvmonitor.java.rt.tablebase.Ab
 		return true;
 	}
 
-	final boolean Prop_1_event_turnto_ball_state_true(Kicker MK, boolean wonderCheckRes) {
+	final boolean Prop_1_event_turnto_ball_state_true(Kicker MK, boolean TurnCheckRes) {
 		{
-			if ( ! (wonderCheckRes) ) {
+			if ( ! (TurnCheckRes) ) {
 				return false;
 			}
 			{
-				System.out.println("Wonder Event TEST TRUE");
+				System.out.println("TURN_TO_BALL Event TEST TRUE");
 				Logger.log(LogFile.TURN_GTB, "turnto_ball_state_true");
 			}
 		}
@@ -264,7 +264,7 @@ class testMonitor extends com.runtimeverification.rvmonitor.java.rt.tablebase.Ab
 	final void Prop_1_handler_violation (){
 		{
 			System.out.println("!!!TURN TO GTB FAIL!!!");
-			Logger.log(LogFile.TURN_GTB, "!!!WONDER TO GTB FAIL!!!");
+			Logger.log(LogFile.TURN_GTB, "!!!TURN_TO_BALL TO GTB FAIL!!!");
 			Delay.msDelay(5000);
 			this.reset();
 		}
@@ -424,7 +424,7 @@ class turnto_gotoballRuntimeMonitor implements com.runtimeverification.rvmonitor
 		turnto_gotoball_RVMLock.unlock();
 	}
 
-	public static final void turnto_ball_state_trueEvent(Kicker MK, boolean wonderCheckRes) {
+	public static final void turnto_ball_state_trueEvent(Kicker MK, boolean TurnCheckRes) {
 		test_activated = true;
 		while (!turnto_gotoball_RVMLock.tryLock()) {
 			Thread.yield();
@@ -460,7 +460,7 @@ class turnto_gotoballRuntimeMonitor implements com.runtimeverification.rvmonitor
 		}
 		// D(X) main:8--9
 		final testMonitor matchedEntryfinalMonitor = matchedEntry;
-		matchedEntry.Prop_1_event_turnto_ball_state_true(MK, wonderCheckRes);
+		matchedEntry.Prop_1_event_turnto_ball_state_true(MK, TurnCheckRes);
 		if(matchedEntryfinalMonitor.Prop_1_Category_violation) {
 			matchedEntryfinalMonitor.Prop_1_handler_violation();
 		}
@@ -659,9 +659,9 @@ public aspect turnto_gotoballMonitorAspect implements com.runtimeverification.rv
 		turnto_gotoballRuntimeMonitor.turnto_ball_state_enterEvent(MK);
 	}
 
-	pointcut test_turnto_ball_state_true(Kicker MK) : (call(public boolean StateCheck.WonderState(Kicker)) && !execution(State StateCheck.GetState(ChangeEvent, Kicker)) && args(MK)) && MOP_CommonPointCut();
-	after (Kicker MK) returning (boolean wonderCheckRes) : test_turnto_ball_state_true(MK) {
-		turnto_gotoballRuntimeMonitor.turnto_ball_state_trueEvent(MK, wonderCheckRes);
+	pointcut test_turnto_ball_state_true(Kicker MK) : (call(public boolean StateCheck.TurnToBallState(Kicker)) && !execution(State StateCheck.GetState(ChangeEvent, Kicker)) && args(MK)) && MOP_CommonPointCut();
+	after (Kicker MK) returning (boolean TurnCheckRes) : test_turnto_ball_state_true(MK) {
+		turnto_gotoballRuntimeMonitor.turnto_ball_state_trueEvent(MK, TurnCheckRes);
 	}
 
 	pointcut test_goto_ball_state_true(Kicker MK) : (call(public boolean StateCheck.GotoBallState(Kicker)) && !execution(State StateCheck.GetState(ChangeEvent, Kicker)) && args(MK)) && MOP_CommonPointCut();

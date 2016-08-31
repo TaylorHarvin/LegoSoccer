@@ -66,7 +66,7 @@ public final class StateCheck{
 	
 	
 	// NOTE: Returning true => that the robot should be in this state
-	public static boolean WonderState(Kicker currMK){
+	public static boolean TurnToBallState(Kicker currMK){
 		if(!ballInFront)
 			return true;
 		else
@@ -159,14 +159,14 @@ public final class StateCheck{
 		robotTurning = currMK.getMotionControl().robotTurning();
 		
 		
-		boolean inWonderState = WonderState(currMK);
+		boolean inTurnToBallState = TurnToBallState(currMK);
 		boolean inGotoBallState = GotoBallState(currMK);
 		boolean inTurnToGoalState = TurnToGoalState(currMK);
 		boolean inDribbleBallState = DribbleBallState(currMK);
 		boolean inKickBallAtGoal = KickBallAtGoal(currMK);
 		
-		if(inWonderState)
-			return State.WONDER;
+		if(inTurnToBallState)
+			return State.TURN_TO_BALL;
 		else if(inGotoBallState)
 			return State.GOTO_BALL;
 		else if(inTurnToGoalState)
@@ -195,8 +195,8 @@ public final class StateCheck{
 	// Print the current state of the robot
 	public static void PrintState(State currState){
 		switch(currState){
-			case WONDER:
-				System.out.println("In -WONDER- State");
+			case TURN_TO_BALL:
+				System.out.println("In -TURN_TO_BALL- State");
 				break;
 			case TURN_TO_GOAL:
 				System.out.println("In -TURN_TO_GOAL- State");

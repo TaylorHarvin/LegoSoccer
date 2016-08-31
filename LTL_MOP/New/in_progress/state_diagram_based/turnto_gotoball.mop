@@ -19,12 +19,12 @@ test(Kicker MK) {
 	boolean failTried = false;
 	
 	
-	//**************************WONDER****************************************************************
+	//**************************TURN_TO_BALL****************************************************************
 	// Turn-To-Ball state check from StateCheck -- when the state enters in Turn-To-Ball
 	event turnto_ball_state_enter before(Kicker MK):
 		call(public boolean Kicker.turnToBall()) && this(MK){
-			System.out.println("Wonder Event ENTER");
-			//StateCheck.PrintState(State.WONDER);
+			System.out.println("Turn_To_Ball Event ENTER");
+			//StateCheck.PrintState(State.TURN_TO_BALL);
 			//StateCheck.GetState(ChangeEvent.IR_MOD, MK);
 			//StateCheck.WonderState(currMK);
 			Logger.log(LogFile.TURN_GTB,"turnto_ball_state_enter");
@@ -32,9 +32,9 @@ test(Kicker MK) {
 	
 	
 	// Turn-To-Ball state check from StateCheck -- when the state is in Turn-To-Ball
-	event turnto_ball_state_true after(Kicker MK) returning (boolean wonderCheckRes):
-		call(public boolean StateCheck.WonderState(Kicker)) && condition(wonderCheckRes) &&  !execution(State StateCheck.GetState(ChangeEvent, Kicker)) && args(MK){
-			System.out.println("Wonder Event TEST TRUE");
+	event turnto_ball_state_true after(Kicker MK) returning (boolean TurnCheckRes):
+		call(public boolean StateCheck.TurnToBallState(Kicker)) && condition(TurnCheckRes) &&  !execution(State StateCheck.GetState(ChangeEvent, Kicker)) && args(MK){
+			System.out.println("TURN_TO_BALL Event TEST TRUE");
 			Logger.log(LogFile.TURN_GTB,"turnto_ball_state_true");
 		}
 	
@@ -87,7 +87,7 @@ test(Kicker MK) {
 	
 	@violation {
 		System.out.println("!!!TURN TO GTB FAIL!!!");
-		Logger.log(LogFile.TURN_GTB,"!!!WONDER TO GTB FAIL!!!");
+		Logger.log(LogFile.TURN_GTB,"!!!TURN_TO_BALL TO GTB FAIL!!!");
 		Delay.msDelay(5000);
 		__RESET;
 	}
