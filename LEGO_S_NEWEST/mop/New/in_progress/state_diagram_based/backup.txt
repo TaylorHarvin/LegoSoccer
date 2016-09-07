@@ -1,0 +1,27 @@
+// Wonder state check from StateCheck -- when the state is not in Wonder
+	// but has been checked for wonder state
+	event turnto_ball_state_false after(Kicker MK) returning (boolean wonderCheckRes):
+		call(public boolean StateCheck.WonderState(Kicker)) && condition(!wonderCheckRes) && args(MK){
+			//System.out.println("Wonder Event TEST FALSE");
+			Logger.log(LogFile.TURN_GTB,"turnto_ball_state_false");
+		}
+		
+
+		
+// 
+		event goto_ball_state_false after(Kicker MK) returning (boolean gtbCheckRes):
+		call(public boolean StateCheck.GotoBallState(Kicker)) && condition(!gtbCheckRes) && args(MK){
+			//System.out.println("GTB Event TEST FALSE");
+			Logger.log(LogFile.TURN_GTB,"goto_ball_state_false");
+		}
+		
+		
+		
+event ballinfront_false after(Kicker MK) returning (boolean ballinfrontRes):
+		call(public boolean Kicker.ballInFront(boolean, float[])) && condition(!ballinfrontRes)&& !within(StateCheck) && target(MK){
+			//currMK = MK;
+			//System.out.println("Ball in front FALSE: "+ballinfrontRes);
+			//StateCheck.GetState(ChangeEvent.IR_MOD, MK);
+			//StateCheck.GetState(ChangeEvent.IR_MOD, MK);
+			System.out.println("ballinfront_false");
+		}

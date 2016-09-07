@@ -1,0 +1,1 @@
+start ajc -1.6 RoboStateMachine.aj  -inpath "./PlayerInit.jar;aspectjrt.jar;rv-monitor-rt.jar"  -outjar test.jar

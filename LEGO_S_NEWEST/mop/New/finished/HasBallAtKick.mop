@@ -1,0 +1,78 @@
+// From LTL 8
+// Robot has the ball at the kick
+// NOTE -- The new wonder code called in violation handling 
+//		   will not trigger the other events
+//		   manual modification of aj file is required
+
+package mop;
+
+import java.io.*;
+import java.util.*;
+import fullSoccer.*;
+
+HasBallAtKick(Kicker MK) {
+	float sonarVal = 9999;
+	boolean ballClose = false;
+	Kicker currMK = null;
+	
+	
+	event kicking before(Kicker MK):
+		call(public void kickBall(int,int, int,int, int, int)) && target(MK){
+			System.out.println("Kick Ball EVENT");
+			currMK = MK;
+			/*if(sonarVal < 0.08)
+				return true;*/
+		}
+	
+		
+	event ballkickable_true after(Kicker MK) returning (boolean res):
+		call(public boolean ballKickable(boolean)) && condition(res) && this(MK){
+			System.out.println("Ball Kickable TRUE: "+ res);
+			currMK = MK;
+		}
+		
+	event ballkickable_false after(Kicker MK) returning (boolean res):
+		call(public boolean ballKickable(boolean)) && condition(!res) && this(MK){
+			System.out.println("Ball Kickable FALSE: "+ res);
+			currMK = MK;
+		}
+
+		
+	// Handle for the ball in front event
+	event ballinfront_true after(Kicker MK) returning (boolean res):
+		call(public boolean Kicker.ballInFront(boolean)) && condition(res) && this(MK){
+			currMK = MK;
+			System.out.println("EVENT Ball in front TRUE: "+ res);
+		}
+		
+	// Handle for the ball in front event
+	event ballinfront_false after(Kicker MK) returning (boolean res):
+		call(public boolean Kicker.ballInFront(boolean)) && condition(!res) && this(MK){
+			currMK = MK;
+			System.out.println("EVENT Ball in front FALSE: "+ res);
+		}	
+		
+		
+		
+	ltl: [](kicking => (*)(ballkickable_true or ballinfront_true))
+	@violation {
+		//sonarVal = currMC.mainSC.fetchSonarVal();
+		
+		// Check the actual position of the ball with sonar and ball in front
+		if(currMK.ballInFront(true) && currMK.ballKickable(true)){
+			System.out.println("!!!BallKickable LTL FAIL -- But Ball Close!!!");
+			System.out.println("!!!Still Kick-Ready!!!");	
+		}
+		else{
+			System.out.println("!!!BallKickable LTL FAIL -- But Ball  NOT Close!!!");
+			System.out.println("!!!Turning to ball -- Recovery!!!");
+			while(!currMK.wonder()){
+				System.out.println("!!!Turning to ball -- Recovery Try!!!");
+			}
+		}
+		//MC.FindAndGrabBall();
+		__RESET;
+	}
+
+}
+

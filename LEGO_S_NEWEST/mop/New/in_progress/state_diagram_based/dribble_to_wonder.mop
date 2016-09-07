@@ -1,0 +1,101 @@
+// Dribble ball state to wonder
+// NOTE -- ball would be moved away from robot if this happened
+
+
+import java.io.*;
+import java.util.*;
+import fullSoccer.*;
+import stateTools.*;
+import lejos.utility.Delay;
+
+test(Kicker MK) { 
+	Kicker currMK;	// Reference to kicker for the ltl violation
+
+
+	// Dribble state events *******************************************************
+	// Dribble event enter -- NOTE: need new method to directly handle this in main code.
+	// 		dribble is just a basic tap of the ball, so it may inaccurately go in and out
+	//		of the "state" incorrectly
+	event dribble_ball_state_enter before(Kicker MK):
+		call(public public void Kicker.dribbleBall()) && this(MK){
+			System.out.println("Dribble Event ENTER");
+			StateCheck.PrintState(StateCheck.GetState(ChangeEvent.IR_MOD, MK));
+		}
+
+
+	// Dribble -- NOTE: need new method to directly handle this.
+	event dribble_state_true after(Kicker MK) returning (boolean dribbleCheckRes):
+		call(public boolean StateCheck.DribbleBallState(Kicker)) && condition(dribbleCheckRes) && args(MK){
+			System.out.println("Dribble Event TEST TRUE");
+		}
+	
+	// Dribble State FALSE
+	event dribble_state_false after(Kicker MK) returning (boolean dribbleCheckRes):
+		call(public boolean StateCheck.DribbleBallState(Kicker)) && condition(!dribbleCheckRes) && args(MK){
+			//System.out.println("Dribble Event TEST FALSE");
+		}
+		
+	//**************************WONDER****************************************************************
+	// Wonder state check from StateCheck -- when the state enters in Wonder
+
+	event turnto_ball_state_enter before(Kicker MK):
+		call(public boolean Kicker.turnToBall()) && this(MK){
+			System.out.println("Wonder Event ENTER");
+			StateCheck.PrintState(State.WONDER);
+			StateCheck.GetState(ChangeEvent.IR_MOD, MK);
+		}
+	
+	// 
+	event turnto_ball_state_exit_true after(Kicker MK) returning (boolean wonderCheckRes):
+		call(public boolean Kicker.turnToBall()) && condition(wonderCheckRes) && this(MK){
+			System.out.println("TURN Event EXIT, RES: TRUE");
+			System.out.println("MOVE BALL FOR FAIL -- NOW!");
+			Delay.msDelay(5000);
+			System.out.println("Delay Finished!");
+			StateCheck.GetState(ChangeEvent.IR_MOD, MK);
+		}
+		
+	// Wonder state check from StateCheck -- when the state is in Wonder
+	event turnto_ball_state_true after(Kicker MK) returning (boolean wonderCheckRes):
+		call(public boolean StateCheck.WonderState(Kicker)) && condition(wonderCheckRes) && args(MK){
+			System.out.println("Wonder Event TEST TRUE");
+		}
+	
+	// Wonder state check from StateCheck -- when the state is not in Wonder
+	// but has been checked for wonder state
+	event turnto_ball_state_false after(Kicker MK) returning (boolean wonderCheckRes):
+		call(public boolean StateCheck.WonderState(Kicker)) && condition(!wonderCheckRes) && args(MK){
+			//System.out.println("Wonder Event TEST FALSE");
+		}
+
+
+
+
+
+
+
+	//************************************************************************************************	
+	
+	event ballinfront_true after(Kicker MK) returning (boolean ballinfrontRes):
+		call(public boolean Kicker.ballInFront(boolean, float[])) && condition(ballinfrontRes) && !within(StateCheck) && target(MK){
+			currMK = MK;
+			System.out.println("Ball in front TRUE: "+ballinfrontRes);
+			//StateCheck.GetState(ChangeEvent.IR_MOD, MK);
+			StateCheck.GetState(ChangeEvent.IR_MOD, MK);
+		}
+		
+	event ballinfront_false after(Kicker MK) returning (boolean ballinfrontRes):
+		call(public boolean Kicker.ballInFront(boolean, float[])) && condition(!ballinfrontRes)&& !within(StateCheck) && target(MK){
+			currMK = MK;
+			System.out.println("Ball in front FALSE: "+ballinfrontRes);
+			//StateCheck.GetState(ChangeEvent.IR_MOD, MK);
+			StateCheck.GetState(ChangeEvent.IR_MOD, MK);
+		}
+		
+	ltl: (dribble_ball_state_enter => (dribble_state_true U ballinfront_false)) and o turnto_ball_state_enter
+	
+	@violation {
+		System.out.println("!!!Dribble TO Wonder FAIL!!!");
+		__RESET;
+	}
+}

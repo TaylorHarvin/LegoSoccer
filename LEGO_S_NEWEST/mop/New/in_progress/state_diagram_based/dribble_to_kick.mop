@@ -1,0 +1,104 @@
+// Dribble ball state to kick to goal
+
+
+import java.io.*;
+import java.util.*;
+import fullSoccer.*;
+import stateTools.*;
+import lejos.utility.Delay;
+
+test(Kicker MK, SensorControl SC) { 
+	Kicker currMK;	// Reference to kicker for the ltl violation
+
+
+	// Dribble state events *******************************************************
+	// Dribble event enter -- NOTE: need new method to directly handle this in main code.
+	// 		dribble is just a basic tap of the ball, so it may inaccurately go in and out
+	//		of the "state" incorrectly
+	event dribble_ball_state_enter before(Kicker MK):
+		call(public public void Kicker.dribbleBall()) && this(MK){
+			System.out.println("Dribble Event ENTER");
+			StateCheck.PrintState(StateCheck.GetState(ChangeEvent.IR_MOD, MK));
+		}
+
+
+	// Dribble -- NOTE: need new method to directly handle this.
+	event dribble_state_true after(Kicker MK) returning (boolean dribbleCheckRes):
+		call(public boolean StateCheck.DribbleBallState(Kicker)) && condition(dribbleCheckRes) && args(MK){
+			System.out.println("Dribble Event TEST TRUE");
+		}
+	
+	// Dribble State FALSE
+	event dribble_state_false after(Kicker MK) returning (boolean dribbleCheckRes):
+		call(public boolean StateCheck.DribbleBallState(Kicker)) && condition(!dribbleCheckRes) && args(MK){
+			//System.out.println("Dribble Event TEST FALSE");
+		}
+		
+
+	
+	
+	// Kick ball state events *******************************************************
+	// Dribble event enter -- NOTE: need new method to directly handle this in main code.
+	// 		dribble is just a basic tap of the ball, so it may inaccurately go in and out
+	//		of the "state" incorrectly
+	event dribble_ball_state_enter before(Kicker MK):
+		call(public public void Kicker.dribbleBall()) && this(MK){
+			System.out.println("Dribble Event ENTER");
+			StateCheck.PrintState(StateCheck.GetState(ChangeEvent.IR_MOD, MK));
+		}
+
+
+	// Kick state true
+	event kick_state_true after(Kicker MK) returning (boolean kickCheckRes):
+		call(public boolean StateCheck.KickBallAtGoal(Kicker)) && condition(kickCheckRes) && args(MK){
+			System.out.println("Wonder Event TEST TRUE");
+		}
+	
+	// Kick State FALSE
+	event dribble_state_false after(Kicker MK) returning (boolean kickCheckRes):
+		call(public boolean StateCheck.KickBallAtGoal(Kicker)) && condition(!kickCheckRes) && args(MK){
+			//System.out.println("Wonder Event TEST FALSE");
+		}
+
+	// Goal range check **************************************************************
+	// in goal range true
+	event kick_state_true after(SensorControl SC) returning (boolean kickCheckRes):
+		call(public boolean inGoalRange()) && condition(kickCheckRes) && this(SC){
+			System.out.println("Goal Range Event TEST TRUE");
+		}
+	
+	// in goal range FALSE
+	event dribble_state_false after(SensorControl SC) returning (boolean kickCheckRes):
+		call(public boolean inGoalRange()) && condition(!kickCheckRes) && this(SC){
+			//System.out.println("Goal Range Event TEST FALSE");
+		}
+
+
+
+
+
+	//************************************************************************************************	
+	
+	event ballinfront_true after(Kicker MK) returning (boolean ballinfrontRes):
+		call(public boolean Kicker.ballInFront(boolean, float[])) && condition(ballinfrontRes) && !within(StateCheck) && target(MK){
+			currMK = MK;
+			System.out.println("Ball in front TRUE: "+ballinfrontRes);
+			//StateCheck.GetState(ChangeEvent.IR_MOD, MK);
+			StateCheck.GetState(ChangeEvent.IR_MOD, MK);
+		}
+		
+	event ballinfront_false after(Kicker MK) returning (boolean ballinfrontRes):
+		call(public boolean Kicker.ballInFront(boolean, float[])) && condition(!ballinfrontRes)&& !within(StateCheck) && target(MK){
+			currMK = MK;
+			System.out.println("Ball in front FALSE: "+ballinfrontRes);
+			//StateCheck.GetState(ChangeEvent.IR_MOD, MK);
+			StateCheck.GetState(ChangeEvent.IR_MOD, MK);
+		}
+		
+	ltl: (dribble_ball_state_enter => (dribble_state_true U ballinfront_true)) and o goto_ball_state_true
+	
+	@violation {
+		System.out.println("!!!Dribble TO Kick FAIL!!!");
+		__RESET;
+	}
+}

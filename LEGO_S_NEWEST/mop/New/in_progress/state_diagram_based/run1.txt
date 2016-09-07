@@ -1,0 +1,144 @@
+Battery Current: 0.15628816
+Battery Voltage: 8.077351
+Choose Player
+Player 1 Selected
+SEN SETUP
+Ball In Front Ping?: true
+***IR MOD Changed***
+*PERFORMING STATE CHECK*
+Goal Range: 167.7051
+Ball In Front Ping?: false
+Ball In Grab Dist: 9999.0
+Ball in front TRUE: true
+MOVE BALL FOR FAIL -- NOW!
+Delay Finished!
+In -DRIBBLE_TO_GOAL- State
+***IR UN-MOD Changed***
+*PERFORMING STATE CHECK*
+Goal Range: 167.7051
+Ball In Front Ping?: false
+Ball In Grab Dist: 9999.0
+Ball in front TRUE: true
+MOVE BALL FOR FAIL -- NOW!
+Delay Finished!
+In -DRIBBLE_TO_GOAL- State
+Ball in Front Dist: 9999.0
+Wonder Event ENTER
+***IR MOD Changed***
+*PERFORMING STATE CHECK*
+Goal Range: 167.7051
+Ball In Front Ping?: false
+Ball In Grab Dist: 9999.0
+Ball in front TRUE: true
+MOVE BALL FOR FAIL -- NOW!
+Delay Finished!
+In -DRIBBLE_TO_GOAL- State
+***IR UN-MOD Changed***
+*PERFORMING STATE CHECK*
+Goal Range: 167.7051
+Ball In Front Ping?: false
+Ball In Grab Dist: 9999.0
+Ball in front TRUE: true
+MOVE BALL FOR FAIL -- NOW!
+Delay Finished!
+In -DRIBBLE_TO_GOAL- State
+60.0
+Init Heading: 0.0
+Final: 60.0
+Ball In Front Ping?: true
+***IR MOD Changed***
+*PERFORMING STATE CHECK*
+Goal Range: 167.7051
+Ball In Front Ping?: false
+Ball in Front Dist: 0.18900001
+Ball in front TRUE: true
+MOVE BALL FOR FAIL -- NOW!
+Delay Finished!
+***IR UN-MOD Changed***
+*PERFORMING STATE CHECK*
+Goal Range: 167.7051
+Ball In Front Ping?: false
+Ball in Front Dist: 0.18900001
+Ball in front TRUE: true
+MOVE BALL FOR FAIL -- NOW!
+Delay Finished!
+Ball in Front Dist: 0.18900001
+Ball in front TRUE: true
+MOVE BALL FOR FAIL -- NOW!
+Delay Finished!
+Ball In Front Ping?: true
+***IR MOD Changed***
+*PERFORMING STATE CHECK*
+Goal Range: 167.7051
+Ball In Front Ping?: false
+Ball in Front Dist: 0.164
+Wonder Event TEST TRUE
+Wonder Event TEST TRUE
+In -WONDER- State
+***IR UN-MOD Changed***
+*PERFORMING STATE CHECK*
+Goal Range: 167.7051
+Ball In Front Ping?: false
+Ball in Front Dist: 0.164
+Wonder Event TEST TRUE
+Wonder Event TEST TRUE
+In -WONDER- State
+Ball in Front Dist: 0.164
+GTB Event ENTER
+Start Goto
+Ball In Front Ping?: true
+***IR MOD Changed***
+*PERFORMING STATE CHECK*
+Goal Range: 167.7051
+Ball In Front Ping?: false
+Ball in Front Dist: 0.164
+Wonder Event TEST TRUE
+Wonder Event TEST TRUE
+In -WONDER- State
+***IR UN-MOD Changed***
+*PERFORMING STATE CHECK*
+Goal Range: 167.7051
+Ball In Front Ping?: false
+Ball in Front Dist: 0.164
+Wonder Event TEST TRUE
+Wonder Event TEST TRUE
+In -WONDER- State
+Ball in Front Dist: 0.164
+Program finished
+
+
+
+ballinfront_true
+
+ballinfront_true
+
+turnto_ball_state_enter
+
+ballinfront_true
+
+ballinfront_true
+
+ballinfront_true
+
+ballinfront_true
+
+ballinfront_true
+
+turnto_ball_state_true
+
+turnto_ball_state_true
+
+turnto_ball_state_true
+
+turnto_ball_state_true
+
+gotoballstate_enter
+
+turnto_ball_state_true
+
+turnto_ball_state_true
+
+turnto_ball_state_true
+
+turnto_ball_state_true
+

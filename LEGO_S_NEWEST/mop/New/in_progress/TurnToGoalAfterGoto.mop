@@ -1,0 +1,51 @@
+// From LTL 3
+// Robot turns to the goal  when GOTO ball/Wonder success
+
+package mop;
+
+import java.io.*;
+import java.util.*;
+import fullSoccer.*;	// Base package for the LeJOS soccer classes
+
+// NOTE:  Kicker can be used here since there are no methods referencing anything
+//		  outside of Kicker directly
+TurnToGoalAfterGoto(Kicker MK) {
+	Kicker currMK = null;	// Copy of MK for violation handling
+							// For some reason MK is not in the scope for 
+							// the violation by default
+	
+	// Goto goal event (right before it is called) -- called directly in Kicker
+	event gotogoal before(Kicker MK):
+		call(public boolean gotoGoal(boolean))&& this(MK){
+			System.out.println("GotoGoal EVENT");
+		}
+	
+	// Wonder event (after it is called) -- called directly in Kicker
+	event wonder_success after(Kicker MK) returning (boolean wonderRes):
+		call(public boolean wonder())&& condition(wonderRes) && this(MK){
+			System.out.println("Wonder success: "+ wonderRes);
+			currMK = MK;
+		}
+		
+	// Wonder event (after it is called) -- called directly in Kicker
+	event wonder_fail after(Kicker MK) returning (boolean wonderRes):
+		call(public boolean wonder())&& condition(!wonderRes) && this(MK){
+			System.out.println("Wonder fail: "+ wonderRes);
+			currMK = MK;
+		}
+
+	// NOTE: For checking the violation, it will probably never trigger
+	//		 naturally in our basic setup, but a triggerLTLViolation flag
+	//		 can be set to true to bypass GotoGoal(..), which will simulate the violation
+	//		 and allow for handling below
+	//ltl: [](wonder_success => gotogoal)
+	ltl: [](wonder_success => o gotogoal)
+	@violation {
+		System.out.println("!!!GOTO_GOAL LTL FAIL!!!");
+		System.out.println("Applying Recovery Goto");
+		currMK.gotoGoal(true);
+		__RESET;
+	}
+
+}
+

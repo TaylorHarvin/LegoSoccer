@@ -27,7 +27,7 @@ public class Kicker {
 	public void play(){
 		boolean ballKickedToGoal = false;
 		//Wonder();
-		/*while(!ballKickedToGoal){
+		while(!ballKickedToGoal){
 			// The ball was found, bring it to the goal
 			if(wonder()){
 				System.out.println("Wonder Worked");
@@ -38,7 +38,7 @@ public class Kicker {
 				//mainMC.KickBall();
 			}
 			System.out.println("Goal Shot: " + ballKickedToGoal);
-		}*/
+		}
 		//System.out.println("Goal Shot: " + GotoGoal(true));
 		//mainMC.DribbleBall();
 		//System.out.println(getBallDirection());
@@ -84,7 +84,7 @@ public class Kicker {
 				/*this.turnToBall();
 				this.gotoBall();*/
 				//this.kickBall(0, 1000, 30, 30, 500, 500);
-				ballInFront(true);
+				//ballInFront(true);
 				/*int count = 1000;
 				while(count > 0){
 					ballInFront(true);
@@ -390,6 +390,8 @@ public class Kicker {
 						dribbleReady = true;
 					}
 					dribbleBall();
+					// Note, this return of false will send it back to turn to ball state
+					// return false;
 				}
 				
 				prevHeading = currHeading;

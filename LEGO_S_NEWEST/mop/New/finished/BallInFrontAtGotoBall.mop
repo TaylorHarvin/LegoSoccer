@@ -1,0 +1,59 @@
+// From LTL 1 
+// 1. Ball is in front of the robot after goto ball
+
+//package mop;
+
+import java.io.*;
+import java.util.*;
+import fullSoccer.*;
+
+BallInFrontAtGotoBall(Kicker MK) {
+	Kicker currMK = null; // Allows for usage of MK in the ltl violation
+	
+	// Handle for the gotoball event
+	event gotoball after(Kicker MK):
+		call(public boolean gotoBall()) && target(MK){
+			currMK = MK;
+			System.out.println("Goto Ball EVENT");
+		}
+	/*event gotoball_false after(Kicker MK) returning (boolean gotoRes):
+		call(public boolean gotoBall()) && condition(!gotoRes) && target(MK){
+			currMK = MK;
+			System.out.println("Goto Ball EVENT: " + gotoRes);
+		}*/
+	
+	// Handle for the ball in front event
+	event ballinfront_true after(Kicker MK) returning (boolean res):
+		call(public boolean Kicker.ballInFront(boolean)) && condition(res) && this(MK){
+			currMK = MK;
+			System.out.println("EVENT Ball in front: "+ res);
+		}
+		
+	// Handle for the ball in front event
+	event ballinfront_false after(Kicker MK) returning (boolean res):
+		call(public boolean Kicker.ballInFront(boolean)) && condition(!res) && this(MK){
+			currMK = MK;
+			System.out.println("EVENT Ball in front: "+ res);
+		}
+		
+	ltl: [](gotoball => o ballinfront_true)
+	@violation {
+		System.out.println("!!!BallInFrontAtGoto LTL FAIL!!!");
+		System.out.println("Re-Attempting FindAndGrabBall");
+		currMK.turnToBall();
+		__RESET;
+	}
+
+	/*ltl: [](gotoball => o ballinfront)
+	//ltl: [](gotoball => [] ballinfront)
+	//ltl: [](gotoball => ( ballinfront and o ballinfront)) // Worked
+	@violation { 
+		System.out.println("!!!BallInFrontAtGoto LTL FAIL!!!");
+		System.out.println("Re-Attempting FindAndGrabBall");
+		//MC.FindAndGrabBall();
+		currMK.turnToBall();
+		__RESET;	// This is supposed to reset the monitor
+	}*/
+
+}
+

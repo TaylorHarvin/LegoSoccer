@@ -1,0 +1,59 @@
+// LTL 7
+// Robot stops at the ball when it is close enough.
+
+package mop;
+
+import java.io.*;
+import java.util.*;
+import fullSoccer.*;
+
+StopAtBallAfterGoto(Kicker MK) {
+	Kicker currMK = null; // Allows for usage of MK in the ltl violation
+	boolean ballInFrontFlag = false;
+	boolean ballCloseFlag = false;
+	
+	
+	// Handle for the gotoball event	
+	event gotoball before(Kicker MK):
+		call(public boolean Kicker.gotoBall()) && target(MK){
+			currMK = MK;
+			System.out.println("Goto Ball EVENT");
+			System.out.println("Ball in front:" + MK.ballInFront(false));
+		}
+	
+	// Handle for the ball in front event
+	event ballinfront_true after(Kicker MK) returning (boolean bifRes):
+		call(public boolean Kicker.ballInFront(boolean)) && condition(bifRes) && this(MK){
+			currMK = MK;
+			System.out.println("Ball in front TRUE: "+ bifRes);
+		}
+		
+	event ballinfront_false after(Kicker MK) returning (boolean bifRes):
+		call(public boolean Kicker.ballInFront(boolean)) && condition(!bifRes) && this(MK){
+			currMK = MK;
+			System.out.println("Ball in front FALSE: "+ bifRes);
+		}
+	
+	event ballclose_true after(Kicker MK) returning (boolean bcRes):
+		call(public boolean Kicker.ballClose(boolean)) && condition(bcRes) && this(MK){
+			currMK = MK;
+			System.out.println("Ball close event TRUE: "+ bcRes);
+		}
+	
+	event ballclose_false after(Kicker MK) returning (boolean bcRes):
+		call(public boolean Kicker.ballClose(boolean)) && condition(!bcRes) && this(MK){
+			currMK = MK;
+			System.out.println("Ball close event FALSE: "+ bcRes);
+		}
+
+	
+	ltl: [](gotoball <=> (ballinfront_true and ballclose_false))
+	@violation { 
+		System.out.println("!!!StopAtBallAfterGoto LTL FAIL!!!");
+		System.out.println("!!!STOPPING ROBOT!!!");
+		currMK.getMotionControl().stopMotion();
+		__RESET;	// This is supposed to reset the monitor
+	}
+
+}
+

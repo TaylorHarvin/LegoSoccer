@@ -1,0 +1,10 @@
+package mop;
+
+import java.io.*;
+import java.util.*;
+import fullSoccer.*;
+StateChange(Kicker MK) {
+	event irModChange(Kicker MK){
+		System.out.println("GENERAL TEST");
+	}
+}
