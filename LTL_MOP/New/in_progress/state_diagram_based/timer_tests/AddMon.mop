@@ -1,0 +1,37 @@
+// Base State LTL
+// Events pulled from the StateCheck class in collaboration with RoboStateMachine.aj
+// Also based directly off of the state diagram to ensure proper transitions
+// -----------------------------------------------------------------------------------
+// FROM: Goto ball state to turn to ball state
+
+
+//package mop;
+
+import java.io.*;
+import java.util.*;
+//import Adder;
+
+
+addMon() { 
+
+	event set_vals after():
+		call(public static void SetNum(int, int)){
+			System.out.println("Vals Set Event");
+		}
+	
+	event add_vals before():
+		call(public static int AddNum()){
+			System.out.println("Add Vals Event");
+		}
+
+
+	ltl: add_vals => (*) set_vals
+			
+	
+	@violation {
+		System.out.println("!!!SET VALS VIOLATION!!!");
+		
+		__RESET;
+	}
+}
+

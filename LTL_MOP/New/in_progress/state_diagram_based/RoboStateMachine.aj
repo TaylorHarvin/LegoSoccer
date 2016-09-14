@@ -244,7 +244,7 @@ aspect RoboStateMachine{
 		
 		//************BIF FAIL TEST**************
 		System.out.println("MOVE BALL FOR FAIL -- NOW!");
-		Delay.msDelay(5000);
+		//Delay.msDelay(5000);
 		System.out.println("Delay Finished!");
 		//***************************************
 		
